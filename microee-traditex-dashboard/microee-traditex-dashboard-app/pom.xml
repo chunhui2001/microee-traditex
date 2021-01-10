@@ -101,12 +101,6 @@
             <artifactId>microee-traditex-liqui-rmi</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <!-- 数据归档 -->
-        <dependency>
-            <groupId>com.microee.traditex.archive.app</groupId>
-            <artifactId>microee-traditex-archive-app</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
     <build>
