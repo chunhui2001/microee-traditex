@@ -29,14 +29,16 @@ public class HttpClientLoggerListener implements HttpClientLogger {
     }
 
     @Override
-    public void log(String method, String url, Headers headers, String bodyString,
-            String errorMessage, Long start, Long speed, Boolean isSSl, String proxyString) { 
+    public void log(boolean success, int statusCode, String method, String url, Headers headers, String bodyString,
+            String message, Long start, Long speed, Boolean isSSl, String proxyString) { 
         Map<String, Object> map = new HashMap<>();
-        map.put("start", start);
-        map.put("speed", speed);
+        map.put("success", success);
+        map.put("code", statusCode);
         map.put("method", method);
         map.put("URL", url);
-        map.put("errorMessage", errorMessage);
+        map.put("start", start);
+        map.put("speed", speed);
+        map.put("message", message);
         map.put("headers", getHeadersMap(headers));
         redisMessage.send(tradiTexHttpLogListererMessageTopic, map);
     }
