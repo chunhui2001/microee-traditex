@@ -8,6 +8,7 @@
     <groupId>com.microee.traditex.liquid.interfaces</groupId>
     <artifactId>microee-traditex-liquid-interfaces</artifactId>
     <version>1.0-SNAPSHOT</version>
+    
     <name>microee-traditex-liquid-interfaces</name>
     <url>http://maven.apache.org</url>
 
@@ -75,5 +76,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
