@@ -14,6 +14,7 @@ import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
 import com.microee.stacks.es6.supports.ElasticSearchSaveSupport;
+import com.microee.stacks.helpers.WebCommons;
 
 @Component
 public class LiquidRedisMessageListener implements MessageListener {
@@ -39,6 +40,9 @@ public class LiquidRedisMessageListener implements MessageListener {
             String index = type + "-" + format1.get().format(new Date(Instant.now().toEpochMilli()));
             JSONObject _messageObject = new JSONObject(_message);
             _messageObject.remove("headers");
+            if (_messageObject.has("URL")) {
+                _messageObject.put("URL", WebCommons.getHttpBaseUrl(_messageObject.getString("URL")));
+            }
             String newId = elasticSearchSave.save(type, index, _messageObject);
             LOGGER.info("保存到es: topic={}, type={}, index={}, newId={}", _topic, type, index, newId);
         } catch (JSONException | IOException e) {

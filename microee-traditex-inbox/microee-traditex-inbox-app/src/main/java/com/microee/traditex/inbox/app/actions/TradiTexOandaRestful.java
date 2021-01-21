@@ -53,6 +53,9 @@ public class TradiTexOandaRestful implements ITradiTexOandaRMi {
         if (httpClientResult == null) {
             return R.failed(R.TIME_OUT, "超时");
         }
+        if (!httpClientResult.isSuccess()) {
+            return R.failed(R.FAILED, "failed");
+        }
         return R.ok(new JSONObject(httpClientResult.getResult()));
     }
 
