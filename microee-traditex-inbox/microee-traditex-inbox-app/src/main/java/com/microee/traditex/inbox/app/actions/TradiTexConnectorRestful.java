@@ -382,8 +382,7 @@ public class TradiTexConnectorRestful implements ITradiTexConnectorRMi {
         if (factory != null) {
             return new R<>(R.FUN, connid, "OK");
         }
-        OandaTradFactory oandaTradFactory = new OandaTradFactory(instruments, streamHost, connid,
-                accountId, accessToken, ConnectType.OANDA_PRICE, combineMessageComponent, proxy);
+        OandaTradFactory oandaTradFactory = new OandaTradFactory(instruments, streamHost, connid, accountId, accessToken, ConnectType.OANDA_PRICE, combineMessageComponent, proxy, httpClientLogger);
         connectionComponent.add(connid, oandaTradFactory);
         oandaTradFactory.connect(false);
         return R.ok(connid);

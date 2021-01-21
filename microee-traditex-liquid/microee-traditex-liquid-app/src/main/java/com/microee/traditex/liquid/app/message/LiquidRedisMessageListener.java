@@ -40,7 +40,7 @@ public class LiquidRedisMessageListener implements MessageListener {
             JSONObject _messageObject = new JSONObject(_message);
             _messageObject.remove("headers");
             String newId = elasticSearchSave.save(type, index, _messageObject);
-            LOGGER.info("保存到es: topic={}, message={}, type={}, index={}, newId={}", _topic, _message, type, index, newId);
+            LOGGER.info("保存到es: topic={}, type={}, index={}, newId={}", _topic, type, index, newId);
         } catch (JSONException | IOException e) {
             LOGGER.error("errorMessage={}", e.getMessage(), e);
         }

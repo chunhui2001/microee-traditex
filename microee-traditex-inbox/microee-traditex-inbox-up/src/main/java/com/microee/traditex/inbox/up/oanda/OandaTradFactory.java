@@ -18,6 +18,7 @@ import com.google.common.collect.ImmutableList;
 import com.microee.plugin.http.assets.HttpAssets;
 import com.microee.plugin.http.assets.HttpClient;
 import com.microee.plugin.http.assets.HttpClientFactory;
+import com.microee.plugin.http.assets.HttpClientLogger;
 import com.microee.plugin.http.assets.HttpClientResult;
 import com.microee.traditex.inbox.oem.connector.ITridexTradFactory;
 import com.microee.traditex.inbox.oem.constrants.ConnectStatus;
@@ -52,8 +53,7 @@ public class OandaTradFactory implements ITridexTradFactory {
     private Long lease; // 租约有效期, 超过这个时间将被销毁
 
     public OandaTradFactory(String[] instruments, String streamHost, String connid, String accountId, String accessToken,
-            ConnectType connectType, CombineMessageListener combineMessageListener,
-            InetSocketAddress proxy) {
+            ConnectType connectType, CombineMessageListener combineMessageListener, InetSocketAddress proxy, HttpClientLogger log) {
         this.instruments = instruments;
         this.thread = OandaStreamThread.create(this);
         this.headers = Headers.of("connid", connid, "Authorization",
@@ -63,7 +63,7 @@ public class OandaTradFactory implements ITridexTradFactory {
         this.auth = this.authentication(accountId, accessToken);
         this.connectType = connectType;
         this.httpClientStream = HttpClientFactory.newClient(proxy, true);
-        this.httpClient = HttpClient.create(null, proxy);
+        this.httpClient = HttpClient.create(null, proxy).setListener(log);
         this.oandaStreamHandler = new OandaStreamHandler(connid, combineMessageListener);
         this.topics = new ArrayList<>();
         this.lastEvent = null;
