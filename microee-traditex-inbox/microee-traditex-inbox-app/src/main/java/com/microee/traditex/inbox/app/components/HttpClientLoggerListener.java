@@ -29,11 +29,12 @@ public class HttpClientLoggerListener implements HttpClientLogger {
     }
 
     @Override
-    public void log(boolean success, int statusCode, String method, String url, Headers headers, String bodyString,
+    public void log(boolean success, int statusCode, long contentLength, String method, String url, Headers headers, String bodyString,
             String message, Long start, Long speed, Boolean isSSl, String proxyString) { 
         Map<String, Object> map = new HashMap<>();
         map.put("success", success);
         map.put("code", statusCode);
+        map.put("length", contentLength);
         map.put("method", method);
         map.put("URL", url);
         map.put("start", start);
