@@ -14,6 +14,7 @@ install-liqui:
 	mvn -f microee-traditex-liqui/microee-traditex-liqui-rmi/pom.xml clean install
 
 install-liquid:
+	mvn -f microee-traditex-liquid/microee-traditex-liquid-interfaces/pom.xml clean install
 	mvn -f microee-traditex-liquid/microee-traditex-liquid-oem/pom.xml clean install
 	mvn -f microee-traditex-liquid/microee-traditex-liquid-rmi/pom.xml clean install
 	
@@ -34,7 +35,7 @@ package-traditex-dashboard-dist: target
 	cp microee-traditex-dashboard/microee-traditex-dashboard-app/target/microee-traditex-dashboard-app-1.0-SNAPSHOT.jar target/
 	
 
-build: install-inbox install-liqui install-liquid package-traditex-inbox-dist package-traditex-liqui-dist package-traditex-liquid-dist package-traditex-dashboard-dist
+build: install-inbox install-liqui install-liquid package-traditex-inbox-dist package-traditex-liquid-dist
 	echo 'build successful'
 
 

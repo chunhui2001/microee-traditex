@@ -3,6 +3,7 @@ info:
   name: microee-traditex-inbox-app
   version: 1.0
   pubtime: 1601547280482
+  last-commit: 69f929f
 
 tomcat:
   apr: false

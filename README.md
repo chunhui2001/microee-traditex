@@ -6,7 +6,6 @@ mvn archetype:generate -DgroupId=com.microee.traditex.inbox -DartifactId=microee
 
 ### 交易微服务 -- traditex-inbox interfaces/服务对外接口
 $ mvn archetype:generate -DgroupId=com.microee.traditex.inbox.interfaces -DartifactId=microee-traditex-inbox-interfaces -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false -DarchetypeCatalog=local
-
 ### 交易微服务 -- traditex-inbox app 长连接服务, 封装第三方api
 $ mvn archetype:generate -DgroupId=com.microee.traditex.inbox.app -DartifactId=microee-traditex-inbox-app -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false -DarchetypeCatalog=local
 ### 交易微服务 -- traditex-inbox oem/领域模型 entity/数据库实体类, model/DababaseObject, vo/ViewObject, po/ParamObject, bo/BusinessObject
@@ -30,6 +29,8 @@ $ mvn archetype:generate -DgroupId=com.microee.traditex.liqui.rmi -DartifactId=m
 
 ### 交易微服务 -- traditex-liquid 流动性摆盘多账户，多币种
 mvn archetype:generate -DgroupId=com.microee.traditex.liquid -DartifactId=microee-traditex-liquid -DarchetypeArtifactId=pom-root -DinteractiveMode=false -DarchetypeGroupId=org.codehaus.mojo.archetypes -DarchetypeVersion=RELEASE -DarchetypeCatalog=local
+### 交易微服务 -- traditex-liquid interfaces/服务对外接口
+$ mvn archetype:generate -DgroupId=com.microee.traditex.liquid.interfaces -DartifactId=microee-traditex-liquid-interfaces -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false -DarchetypeCatalog=local
 ### 交易微服务 -- traditex-liquid app
 $ mvn archetype:generate -DgroupId=com.microee.traditex.liquid.app -DartifactId=microee-traditex-liquid-app -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false -DarchetypeCatalog=local
 ### 交易微服务 -- traditex-liquid oem/领域模型, entity/数据库实体类, model/DababaseObject, vo/ViewObject, po/ParamObject, bo/BusinessObject
