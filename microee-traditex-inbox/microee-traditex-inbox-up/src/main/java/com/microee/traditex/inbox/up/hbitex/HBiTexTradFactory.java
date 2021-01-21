@@ -289,7 +289,7 @@ public class HBiTexTradFactory implements ITridexTradFactory {
         try {
             httpClientResult = this.httpClient.doGetWithQueryParams(endpoint, this.headers, queryMap);
         } catch (Exception e) {
-            throw new RestException(R.SERVER_ERROR, e.getMessage());
+            throw new RuntimeException(e);
         }
         if (httpClientResult == null) {
             throw new RestException(R.TIME_OUT, "超时");
@@ -306,7 +306,7 @@ public class HBiTexTradFactory implements ITridexTradFactory {
         try {
             httpClientResult = this.httpClient.doGetWithQueryParams(connector, this.headers, null);
         } catch (Exception e) {
-            throw new RestException(R.SERVER_ERROR, e.getMessage());
+            throw new RuntimeException(e);
         }
         if (httpClientResult == null) {
             throw new RestException(R.TIME_OUT, "超时");
@@ -323,7 +323,7 @@ public class HBiTexTradFactory implements ITridexTradFactory {
         try {
             httpClientResult = this.httpClient.postJsonBody(connector, this.headers, this.httpClient.getJsonString(bodyParam));
         } catch (Exception e) {
-            throw new RestException(R.SERVER_ERROR, e.getMessage());
+            throw new RuntimeException(e);
         }
         if (httpClientResult == null) {
             throw new RestException(R.TIME_OUT, "超时");
@@ -340,7 +340,7 @@ public class HBiTexTradFactory implements ITridexTradFactory {
         try {
             httpClientResult = httpClient.postJsonBody(connector, headers, HttpAssets.toJsonString(bodyParam));
         } catch (Exception e) {
-            throw new RestException(R.SERVER_ERROR, e.getMessage());
+            throw new RuntimeException(e);
         }
         if (httpClientResult == null) {
             throw new RestException(R.TIME_OUT, "超时");
@@ -397,7 +397,7 @@ public class HBiTexTradFactory implements ITridexTradFactory {
         try {
             return new String(new org.apache.commons.codec.binary.Base64().encode(str), StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
-            return null;
+            throw new RuntimeException(e);
         }
     }
     
@@ -414,8 +414,7 @@ public class HBiTexTradFactory implements ITridexTradFactory {
         try {
             return URLEncoder.encode(payload, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
-            LOGGER.error("url={}, errorMessage={}", payload, e.getMessage(), e);
-            return null;
+            throw new RuntimeException(e);
         }
     }
 
