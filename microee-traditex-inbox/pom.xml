@@ -15,6 +15,7 @@
         <module>microee-traditex-inbox-oem</module>
         <module>microee-traditex-inbox-rmi</module>
         <module>microee-traditex-inbox-mock</module>
+        <module>microee-traditex-inbox-interfaces</module>
     </modules>
 
 </project>

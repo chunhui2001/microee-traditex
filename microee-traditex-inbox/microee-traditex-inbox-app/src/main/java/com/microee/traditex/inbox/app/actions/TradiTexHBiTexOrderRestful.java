@@ -14,13 +14,13 @@ import com.microee.plugin.response.R;
 import com.microee.plugin.response.exception.RestException;
 import com.microee.traditex.inbox.app.components.TradiTexConnectComponent;
 import com.microee.traditex.inbox.app.validator.RestValidator;
+import com.microee.traditex.inbox.interfaces.ITradiTexHBiTexOrderRMi;
 import com.microee.traditex.inbox.oem.connector.TradiTexConnection;
 import com.microee.traditex.inbox.oem.hbitex.HBiTexHttpResult;
 import com.microee.traditex.inbox.oem.hbitex.po.BigDecimalValue;
 import com.microee.traditex.inbox.oem.hbitex.po.HBiTexOrderPlaceParam;
 import com.microee.traditex.inbox.oem.hbitex.vo.HBiTexOrderDetails;
 import com.microee.traditex.inbox.oem.hbitex.vo.OrderMatchresults;
-import com.microee.traditex.inbox.oem.rmi.ITradiTexHBiTexOrderRMi;
 import com.microee.traditex.inbox.up.hbitex.HBiTexTradFactory;
 
 //HBiTex 订单相关

@@ -1,4 +1,4 @@
-package com.microee.traditex.inbox.oem.rmi;
+package com.microee.traditex.inbox.interfaces;
 
 import java.util.List;
 import java.util.Map;

@@ -15,11 +15,11 @@ import com.microee.plugin.response.R;
 import com.microee.traditex.inbox.app.components.TradiTexConnectComponent;
 import com.microee.traditex.inbox.app.components.TradiTexRedis;
 import com.microee.traditex.inbox.app.validator.RestValidator;
+import com.microee.traditex.inbox.interfaces.ITradiTexHBiTexAccountRMi;
 import com.microee.traditex.inbox.oem.connector.TradiTexConnection;
 import com.microee.traditex.inbox.oem.hbitex.HBiTexHttpResult;
 import com.microee.traditex.inbox.oem.hbitex.vo.AccountBalance;
 import com.microee.traditex.inbox.oem.hbitex.vo.AccountBalanceList;
-import com.microee.traditex.inbox.oem.rmi.ITradiTexHBiTexAccountRMi;
 import com.microee.traditex.inbox.up.hbitex.HBiTexTradFactory;
 import okhttp3.Headers;
 

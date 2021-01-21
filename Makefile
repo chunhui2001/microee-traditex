@@ -4,6 +4,7 @@ target:
 
 
 install-inbox:
+	mvn -f microee-traditex-inbox/microee-traditex-inbox-interfaces/pom.xml clean install
 	mvn -f microee-traditex-inbox/microee-traditex-inbox-oem/pom.xml clean install
 	mvn -f microee-traditex-inbox/microee-traditex-inbox-up/pom.xml clean install
 	mvn -f microee-traditex-inbox/microee-traditex-inbox-rmi/pom.xml clean install

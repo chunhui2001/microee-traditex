@@ -16,9 +16,9 @@ import com.microee.plugin.http.assets.HttpClientResult;
 import com.microee.plugin.response.R;
 import com.microee.traditex.inbox.app.components.TradiTexConnectComponent;
 import com.microee.traditex.inbox.app.validator.RestValidator;
+import com.microee.traditex.inbox.interfaces.ITradiTexOandaRMi;
 import com.microee.traditex.inbox.oem.connector.ITridexTradFactory;
 import com.microee.traditex.inbox.oem.connector.TradiTexConnection;
-import com.microee.traditex.inbox.oem.rmi.ITradiTexOandaRMi;
 import com.microee.traditex.inbox.up.oanda.OandaTradFactory;
 
 // oanda 外汇相关
