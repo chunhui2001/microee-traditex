@@ -47,3 +47,4 @@ yarn.lock*
 *.zip
 package-lock.json
 microee-traditex-liqui/microee-traditex-liqui-app/src/main/resources/application-ignore.properties
+microee-traditex-liquid/microee-traditex-liquid-app/src/main/resources/application-local.properties

@@ -30,6 +30,8 @@
         <maven.test.skip>true</maven.test.skip>
         <spring-cloud.version>Edgware.SR3</spring-cloud.version>
         <okhttp.version>4.6.0</okhttp.version>
+        <!-- <elasticsearch.version>7.3.0</elasticsearch.version> -->
+        <elasticsearch.version>6.8.13</elasticsearch.version>
     </properties>
 
     <dependencyManagement>
@@ -51,45 +53,32 @@
                 <artifactId>logging-interceptor</artifactId>
                 <version>${okhttp.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-core</artifactId>
-                <version>3.17.2</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
+        <!-- 服务对外接口 -->
+        <dependency>
+            <groupId>com.microee.traditex.liquid.interfaces</groupId>
+            <artifactId>microee-traditex-liquid-interfaces</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <!-- 服务领域模型 -->
+        <dependency>
+            <groupId>com.microee.traditex.liquid.oem</groupId>
+            <artifactId>microee-traditex-liquid-oem</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
         <!-- 微服务基础项目 -->
         <dependency>
             <groupId>com.microee.stacks.starter</groupId>
             <artifactId>microee-starter</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <!-- 领域模型 -->
+        <!-- 微服务领域模型 -->
         <dependency>
             <groupId>com.microee.stacks.oem</groupId>
             <artifactId>microee-oem</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <!-- 短id -->
-        <dependency>
-            <groupId>org.hashids</groupId>
-            <artifactId>hashids</artifactId>
-            <version>1.0.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.microee.plugin.assist</groupId>
-            <artifactId>microee-assist</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.microee.traditex.liquid.oem</groupId>
-            <artifactId>microee-traditex-liquid-oem</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <!-- redis -->
@@ -98,10 +87,16 @@
             <artifactId>microee-redis</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <!-- 服务对外接口 -->
+        <!-- elastic search 7.0 -->
+        <!-- <dependency>
+            <groupId>com.microee.stacks.es</groupId>
+            <artifactId>microee-es</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency> -->
+        <!-- elastic search 6.0 -->
         <dependency>
-            <groupId>com.microee.traditex.liquid.interfaces</groupId>
-            <artifactId>microee-traditex-liquid-interfaces</artifactId>
+            <groupId>com.microee.stacks.es6</groupId>
+            <artifactId>microee-es6</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
