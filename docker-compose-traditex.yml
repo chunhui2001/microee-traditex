@@ -18,7 +18,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     ports:
-      - 18081:18081
+      - 28081:28081
     entrypoint: ["java", "-Djava.library.path=/usr/local/tomcat/native-jni-lib", "-jar", "/root/app/app.jar"]
     volumes:
       - ./target/microee-traditex-inbox-app-1.0-SNAPSHOT.jar:/root/app/app.jar:ro
@@ -36,7 +36,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     ports:
-      - 18180:18180
+      - 28082:28082
     entrypoint: ["java", "-Djava.library.path=/usr/local/tomcat/native-jni-lib", "-jar", "/root/app/app.jar"]
     volumes:
       - ./target/microee-traditex-liquid-app-1.0-SNAPSHOT.jar:/root/app/app.jar:ro
