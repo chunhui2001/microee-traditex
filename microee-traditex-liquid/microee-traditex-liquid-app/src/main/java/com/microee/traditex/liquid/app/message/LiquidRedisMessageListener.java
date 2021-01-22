@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
-import com.microee.stacks.es6.supports.ElasticSearchSaveSupport;
+import com.microee.stacks.es.supports.ElasticSearchSaveSupport;
 import com.microee.stacks.helpers.WebCommons;
 
 @Component
@@ -43,7 +43,7 @@ public class LiquidRedisMessageListener implements MessageListener {
             if (_messageObject.has("URL")) {
                 _messageObject.put("URL", WebCommons.getHttpBaseUrl(_messageObject.getString("URL")));
             }
-            String newId = elasticSearchSave.save(type, index, _messageObject);
+            String newId = elasticSearchSave.save(index, _messageObject);
             LOGGER.info("保存到es: topic={}, type={}, index={}, newId={}", _topic, type, index, newId);
         } catch (JSONException | IOException e) {
             LOGGER.error("errorMessage={}", e.getMessage(), e);

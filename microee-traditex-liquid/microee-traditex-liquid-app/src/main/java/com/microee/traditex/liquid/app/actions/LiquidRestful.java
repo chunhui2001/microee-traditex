@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.microee.plugin.response.R;
-import com.microee.stacks.es6.supports.ElasticSearchIndexSupport;
-import com.microee.stacks.es6.supports.ElasticSearchSupport;
+import com.microee.stacks.es.supports.ElasticSearchIndexSupport;
+import com.microee.stacks.es.supports.ElasticSearchSupport;
 
 @RestController
 @RequestMapping("/liquid")
@@ -32,7 +32,7 @@ public class LiquidRestful {
     @RequestMapping(value = "/sla", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public R<List<Map<String, Object>>> sla(@RequestParam(value="size", required=false, defaultValue="10") Integer size) throws IOException {
         String type = "api-monitor-sla";
-        return R.ok(searchSupport.search(type, type + "*", "id", String.format("{\n" + 
+        return R.ok(searchSupport.search(type + "*", "id", String.format("{\n" + 
                 "  \"size\": %s,\n" + 
                 "  \"timeout\": \"1s\",\n" + 
                 "  \"sort\": [\n" + 

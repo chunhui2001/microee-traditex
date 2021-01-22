@@ -30,8 +30,8 @@
         <maven.test.skip>true</maven.test.skip>
         <spring-cloud.version>Edgware.SR3</spring-cloud.version>
         <okhttp.version>4.6.0</okhttp.version>
-        <!-- <elasticsearch.version>7.3.0</elasticsearch.version> -->
-        <elasticsearch.version>6.8.13</elasticsearch.version>
+        <elasticsearch.version>7.3.0</elasticsearch.version>
+        <!-- <elasticsearch.version>6.8.13</elasticsearch.version> -->
     </properties>
 
     <dependencyManagement>
@@ -88,17 +88,17 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <!-- elastic search 7.0 -->
-        <!-- <dependency>
+        <dependency>
             <groupId>com.microee.stacks.es</groupId>
             <artifactId>microee-es</artifactId>
             <version>1.0-SNAPSHOT</version>
-        </dependency> -->
+        </dependency>
         <!-- elastic search 6.0 -->
-        <dependency>
+        <!-- <dependency>
             <groupId>com.microee.stacks.es6</groupId>
             <artifactId>microee-es6</artifactId>
             <version>1.0-SNAPSHOT</version>
-        </dependency>
+        </dependency> -->
     </dependencies>
 
     <build>
