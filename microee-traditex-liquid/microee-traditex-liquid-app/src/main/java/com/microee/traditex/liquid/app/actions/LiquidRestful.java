@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,12 +23,17 @@ public class LiquidRestful {
 
     @Autowired
     private ElasticSearchSupport searchSupport;
+
+    
+    @RequestMapping(value = "/createSlaIndex", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public R<String> createIndex(@RequestParam("indexName") String indexName, @RequestParam("alias") String alias, @RequestBody Map<String, Object> props) throws IOException {
+        return R.ok(indexSupport.createIndex(indexName, alias, 3, 3, props)); 
+    }
     
     @RequestMapping(value = "/removeIndex", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public R<Boolean> removeIndex(@RequestParam("indexName") String indexName) throws IOException {
         return R.ok(indexSupport.deleteIndex(indexName));
     }
-    
 
     @RequestMapping(value = "/sla", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public R<List<Map<String, Object>>> sla(@RequestParam(value="size", required=false, defaultValue="10") Integer size) throws IOException {
