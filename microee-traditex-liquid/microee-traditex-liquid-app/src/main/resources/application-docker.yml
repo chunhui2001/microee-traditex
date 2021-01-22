@@ -1,14 +1,4 @@
 
-tomcat:
-  apr: true
-
-# eureka
-eureka:
-  client:
-    enabled: false
-    healthcheck: false
-      
-
 redis:
   database: 0
   timeout: 1000
