@@ -31,7 +31,7 @@ public class HBiTexRetryer {
     }
     
     public void reconnectLoop() {
-        ThreadPoolFactoryLow.newInstance("traditex-inbox-断线重连线程池").pool().submit(() -> {
+        ThreadPoolFactoryLow.newInstance("traditex-inbox-断线重连线程池").submit(() -> {
             try {
                 while (true) {
                     DelayedItem<TradiTexConnection<?>> reconnect = reconnectDealyQueue.take();
