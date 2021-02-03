@@ -37,7 +37,8 @@ public class OandaTradFactory implements ITridexTradFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(OandaTradFactory.class);
 
     private String streamHost;
-    private Headers headers;
+    private Headers restHeaders;
+    private Headers streamHeaders;
     private final JSONObject auth;
     private final ConnectType connectType;
     private final HttpClient httpClient;
@@ -56,13 +57,13 @@ public class OandaTradFactory implements ITridexTradFactory {
             ConnectType connectType, CombineMessageListener combineMessageListener, InetSocketAddress proxy, HttpClientLogger log) {
         this.instruments = instruments;
         this.thread = OandaStreamThread.create(this);
-        this.headers = Headers.of("connid", connid, "Authorization",
-                String.format("Bearer %s", accessToken), "Accept-Datetime-Format", "UNIX", "Connection", "close");
+        this.streamHeaders = Headers.of("connid", connid, "Authorization", String.format("Bearer %s", accessToken), "Accept-Datetime-Format", "UNIX", "Connection", "close");
+        this.restHeaders = Headers.of("connid", connid, "Authorization", String.format("Bearer %s", accessToken), "Accept-Datetime-Format", "UNIX");
         this.streamHost = streamHost;
         this.accountId = accountId;
         this.auth = this.authentication(accountId, accessToken);
         this.connectType = connectType;
-        this.httpClientStream = HttpClientFactory.newClient(proxy, true);
+        this.httpClientStream = HttpClientFactory.newClient(proxy);
         this.httpClient = HttpClient.create(null, proxy).setListener(log);
         this.oandaStreamHandler = new OandaStreamHandler(connid, combineMessageListener);
         this.topics = new ArrayList<>();
@@ -84,7 +85,7 @@ public class OandaTradFactory implements ITridexTradFactory {
         Response response = null;
         BufferedReader in = null;
         Request.Builder builder = new Request.Builder();
-        builder.headers(headers);
+        builder.headers(streamHeaders);
         String url = HttpAssets.getUrl(endpoint, queryParams);
         Request request = builder.url(url).get().build();
         try {
@@ -143,7 +144,7 @@ public class OandaTradFactory implements ITridexTradFactory {
 
     @Override
     public String connid() {
-        return this.headers.get("connid");
+        return this.streamHeaders.get("connid");
     }
 
     public String getAccountId() {
@@ -181,7 +182,7 @@ public class OandaTradFactory implements ITridexTradFactory {
     }
 
     public List<String> readHeaders() {
-        return ImmutableList.copyOf(this.headers.iterator()).stream()
+        return ImmutableList.copyOf(this.streamHeaders.iterator()).stream()
                 .map(f -> String.format("%s: %s", f.getFirst(),
                         TradiTexAssists.shorterContent(f.getSecond(), (short) 15)))
                 .collect(Collectors.toList());
@@ -238,7 +239,7 @@ public class OandaTradFactory implements ITridexTradFactory {
         String endpoint = String.format("%s/v3/accounts/%s/pricing", resthost, this.accountId);
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("instruments", symbols[0]);
-        return httpClient.doGetWithQueryParams(endpoint, this.headers, queryParams);
+        return httpClient.doGetWithQueryParams(endpoint, this.restHeaders, queryParams);
     }
 
     //@formatter:off
@@ -282,7 +283,7 @@ public class OandaTradFactory implements ITridexTradFactory {
     // 查询账户余额
     public HttpClientResult querySummary(String resthost) {
         String endpoint = String.format("%s/v3/accounts/%s/summary", resthost, this.accountId);
-        return httpClient.doGetWithQueryParams(endpoint, headers, null);
+        return httpClient.doGetWithQueryParams(endpoint, restHeaders, null);
     }
 
     //@formatter:off
@@ -337,7 +338,7 @@ public class OandaTradFactory implements ITridexTradFactory {
                 "{ \"order\": { \"units\": \"%s\", \"instrument\": \"%s\", \"timeInForce\": \"FOK\", \"type\": \"MARKET\", \"positionFill\": \"DEFAULT\" } }", unitsString, symbol);
         //@formatter:on
         String endpoint = String.format("%s/v3/accounts/%s/orders", resthost, this.accountId);
-        return httpClient.postJsonBody(endpoint, headers, param);
+        return httpClient.postJsonBody(endpoint, restHeaders, param);
     }
 
     @Override

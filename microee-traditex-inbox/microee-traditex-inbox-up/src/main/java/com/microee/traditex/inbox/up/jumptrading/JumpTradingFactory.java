@@ -41,7 +41,7 @@ public class JumpTradingFactory implements ITridexTradFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(JumpTradingFactory.class);
 
     private String streamHost;
-    private Headers headers;
+    private Headers streamHeaders;
     private final JSONObject auth;
     private final ConnectType connectType;
     private final HttpClient httpClient;
@@ -61,14 +61,14 @@ public class JumpTradingFactory implements ITridexTradFactory {
             ConnectType connectType, CombineMessageListener combineMessageListener,
             InetSocketAddress proxy) {
         this.thread = JumpTradingThread.create(this);
-        this.headers = Headers.of("connid", connid, "Connection", "close");
+        this.streamHeaders = Headers.of("connid", connid, "Connection", "close"); // 长连接断线时需断开连接
         this.streamHost = streamHost;
         this.apiKey = apiKey;
         this.secret = secret;
         this.auth = this.authentication(apiKey, secret);
         this.connectType = connectType;
-        this.httpClientStream = HttpClientFactory.newClient(proxy, true);
-        this.httpClient = HttpClient.create(null, proxy);
+        this.httpClientStream = HttpClientFactory.newClient(proxy);
+        this.httpClient = HttpClient.create(proxy);
         this.orderBookStreamHandler = new OrderBookStreamHandler(connid, combineMessageListener);
         this.topics = new ArrayList<>();
         this.lastEvent = null;
@@ -129,7 +129,7 @@ public class JumpTradingFactory implements ITridexTradFactory {
         Response response = null;
         BufferedReader in = null;
         Request.Builder builder = new Request.Builder();
-        builder.headers(headers);
+        builder.headers(streamHeaders);
         Request request = new Request.Builder().url(jtConnectorString).get().build();
         try {
             orderBookStreamHandler.setConnectStatus(ConnectStatus.CONNECTING);
@@ -191,7 +191,7 @@ public class JumpTradingFactory implements ITridexTradFactory {
 
     @Override
     public String connid() {
-        return this.headers.get("connid");
+        return this.streamHeaders.get("connid");
     }
 
     @Override
@@ -226,7 +226,7 @@ public class JumpTradingFactory implements ITridexTradFactory {
     }
 
     public List<String> readHeaders() {
-        return ImmutableList.copyOf(this.headers.iterator()).stream()
+        return ImmutableList.copyOf(this.streamHeaders.iterator()).stream()
                 .map(f -> String.format("%s: %s", f.getFirst(),
                         TradiTexAssists.shorterContent(f.getSecond(), (short) 15)))
                 .collect(Collectors.toList());
