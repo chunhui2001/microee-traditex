@@ -1,3 +1,15 @@
+
+### API kraken
+https://www.kraken.com/features/api#get-ticker-info
+
+### Kraken
+https://trade.kraken.com/charts/KRAKEN:USDT-USD
+
+### USDT/USD 实时价格
+https://api.kraken.com/0/public/Ticker?pair=USDTUSD
+
+
+
 ### 交易微服务 -- traditex parent
 $ mvn archetype:generate -DgroupId=com.microee.traditex -DartifactId=microee-traditex -DarchetypeArtifactId=pom-root -DinteractiveMode=false -DarchetypeGroupId=org.codehaus.mojo.archetypes -DarchetypeVersion=RELEASE -DarchetypeCatalog=local
 
