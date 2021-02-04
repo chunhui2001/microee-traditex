@@ -64,7 +64,7 @@ public class DelayQueryOrderStatsService implements InitializingBean {
 
     // 启动延迟撤单
     public void startupDelayQuery() {
-        threadPool.pool().submit(() -> {
+        threadPool.submit(() -> {
             LOGGER.info("启动延迟查询挂单状态队列: 延迟时间={} 毫秒", DELAY_QUERY_ORDER_TIME_MS);
             try {
                 while (true) {
