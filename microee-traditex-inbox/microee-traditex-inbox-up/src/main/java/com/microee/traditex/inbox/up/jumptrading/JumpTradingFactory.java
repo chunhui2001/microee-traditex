@@ -78,7 +78,6 @@ public class JumpTradingFactory implements ITridexTradFactory {
         this.proxy = new JumpTradingProxy(this);
     }
 
-
     public JSONObject authentication(String apiKey, String secret) {
         return new JSONObject().put("apiKey", apiKey).put("secret", secret);
     }
@@ -97,12 +96,9 @@ public class JumpTradingFactory implements ITridexTradFactory {
                 String.valueOf(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli() / 1000);
         try {
             String payloadString = payload == null ? "{}" : HttpAssets.toJsonString(payload);
-            String payload64 = Base64.getEncoder()
-                    .encodeToString(payloadString.getBytes(StandardCharsets.UTF_8));
-            String signature = HmacUtil.encryptStr(this.apiKey + payload64 + nonce, this.secret,
-                    HmacUtil.ALGORITHM_SHA384, StandardCharsets.UTF_8.toString());
-            builder.append("?APIKEY=").append(this.apiKey).append("&PAYLOAD=").append(payload64)
-                    .append("&NONCE=").append(nonce).append("&SIGNATURE=").append(signature);
+            String payload64 = Base64.getEncoder().encodeToString(payloadString.getBytes(StandardCharsets.UTF_8));
+            String signature = HmacUtil.encryptStr(this.apiKey + payload64 + nonce, this.secret, HmacUtil.ALGORITHM_SHA384, StandardCharsets.UTF_8.toString());
+            builder.append("?APIKEY=").append(this.apiKey).append("&PAYLOAD=").append(payload64).append("&NONCE=").append(nonce).append("&SIGNATURE=").append(signature);
             return builder.toString();
         } catch (Exception e) {
             throw new RuntimeException("jt构建加密参数异常", e);
@@ -157,14 +153,13 @@ public class JumpTradingFactory implements ITridexTradFactory {
             }
             orderBookStreamHandler.setConnectStatus(ConnectStatus.DAMAGED);
             orderBookStreamHandler.onDisconnectTrigger(request, e);
-            LOGGER.error("JumpTrading建立OrderBookStream连接IO异常: url={}, errorMessage={}", endpoint,
-                    e.getMessage());
+            LOGGER.error("JumpTrading建立OrderBookStream连接IO异常: url={}, errorMessage={}", endpoint, e.getMessage());
         } catch (Exception e) {
             if (!this.orderBookStreamHandler.getConnectStatus().equals(ConnectStatus.DESTROY)) {
                 LOGGER.error(
                         "JumpTrading建立OrderBookStream连接异常:  connid={}, url={}, status={}, errorMessage={}",
                         this.connid(), endpoint, this.orderBookStreamHandler.getConnectStatus(),
-                        e.getMessage());
+                        e.getMessage(), e);
                 orderBookStreamHandler.setConnectStatus(ConnectStatus.DAMAGED);
                 orderBookStreamHandler.onDisconnectTrigger(request, e);
             }
@@ -202,15 +197,12 @@ public class JumpTradingFactory implements ITridexTradFactory {
         json.put("headers", this.readHeaders());
         json.put("stream-host", this.streamHost);
         json.put("topic", this.topics());
-        json.put("lastEvent",
-                this.lastEvent == null ? "N/a" : (this.lastEvent + "/" + this.lastTime));
+        json.put("lastEvent", this.lastEvent == null ? "N/a" : (this.lastEvent + "/" + this.lastTime));
         json.put("lastPing", this.lastPing == null ? "N/a" : (this.lastPing + "/" + this.lease));
         JSONObject authjson = new JSONObject();
         if (this.auth != null && this.auth.has("apiKey")) {
-            authjson.put("apiKey",
-                    TradiTexAssists.shorterContent(this.auth.getString("apiKey"), (short) 8));
-            authjson.put("secret",
-                    TradiTexAssists.shorterContent(this.auth.getString("secret"), (short) 8));
+            authjson.put("apiKey", TradiTexAssists.shorterContent(this.auth.getString("apiKey"), (short) 8));
+            authjson.put("secret", TradiTexAssists.shorterContent(this.auth.getString("secret"), (short) 8));
         }
         json.put("auth", authjson);
         json.put("status", this.orderBookStreamHandler.getConnectStatus().name());
@@ -268,6 +260,9 @@ public class JumpTradingFactory implements ITridexTradFactory {
                 this.orderBookStreamHandler.getConnectStatus(), this.config());
     }
 
+    /**
+     * 是否是重连
+     */
     @Override
     public void connect(boolean retryer) {
         if (retryer) {

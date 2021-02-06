@@ -32,12 +32,10 @@ public class JumpTradingProxy {
      * 心跳
      */
     public void heartBeat() {
-        JumpTradingApiResultForHeartbeat apiResult = factory.post("jumpTrading心跳",
-                "/v2/testRequest", null, new TypeReference<JumpTradingApiResultForHeartbeat>() {});
+        JumpTradingApiResultForHeartbeat apiResult = factory.post("jumpTrading心跳", "/v2/testRequest", null, new TypeReference<JumpTradingApiResultForHeartbeat>() {});
         if (apiResult == null || !apiResult.success()) {
             // 心跳失败， 重新建立连接
-            LOGGER.info("jumpTrading-心跳失败/重新建立连接: apiResult={}, 心跳间隔={}",
-                    HttpAssets.toJsonString(apiResult), HEART_PERIOD + "秒");
+            LOGGER.info("jumpTrading-心跳失败/重新建立连接: apiResult={}, 心跳间隔={}", HttpAssets.toJsonString(apiResult), HEART_PERIOD + "秒");
             return;
         }
     }

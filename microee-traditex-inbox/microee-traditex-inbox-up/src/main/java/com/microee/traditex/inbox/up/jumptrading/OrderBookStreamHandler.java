@@ -76,7 +76,11 @@ public class OrderBookStreamHandler {
         Long receiveTime = Instant.now().toEpochMilli();
         JSONObject _times = new JSONObject();
         _times.put("timeA", receiveTime); // 收到时间
-        JSONObject jsonObject = new JSONObject(line);
+        JSONObject jsonObject = line.trim().startsWith("{") ? new JSONObject(line) : null;
+        if (jsonObject == null) {
+            logger.warn("收到的消息不是json格式, vender={}, url={}, message={}", _VENDER.name(), request.url(), line);
+            return;
+        }
         JumpTradingApiResultBase lineObject = JumpTradingApiResultBase.parseResult(line);
         if (lineObject.getMsgType().equals("REST_BOOKSYNCH")) {
             _times.put("timeB", Instant.now().toEpochMilli()); // 处理时间
