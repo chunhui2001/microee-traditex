@@ -145,15 +145,14 @@ public class JumpTradingFactory implements ITridexTradFactory {
         } catch (SocketTimeoutException e) {
             orderBookStreamHandler.setConnectStatus(ConnectStatus.DAMAGED);
             orderBookStreamHandler.onDisconnectTrigger(request, e);
-            LOGGER.error("JumpTrading建立OrderBookStream连接超时: url={}, errorMessage={}", endpoint,
-                    e.getMessage());
+            LOGGER.error("JumpTrading建立OrderBookStream连接超时: url={}, errorMessage={}", endpoint, e.getMessage(), e);
         } catch (IOException e) {
             if (this.orderBookStreamHandler.getConnectStatus().equals(ConnectStatus.DESTROY)) {
                 return this;
             }
             orderBookStreamHandler.setConnectStatus(ConnectStatus.DAMAGED);
             orderBookStreamHandler.onDisconnectTrigger(request, e);
-            LOGGER.error("JumpTrading建立OrderBookStream连接IO异常: url={}, errorMessage={}", endpoint, e.getMessage());
+            LOGGER.error("JumpTrading建立OrderBookStream连接IO异常: url={}, errorMessage={}", endpoint, e.getMessage(), e);
         } catch (Exception e) {
             if (!this.orderBookStreamHandler.getConnectStatus().equals(ConnectStatus.DESTROY)) {
                 LOGGER.error(
@@ -168,8 +167,7 @@ public class JumpTradingFactory implements ITridexTradFactory {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    LOGGER.error("JumpTrading建立OrderBookStream连接IOO异常: url={}, errorMessage={}",
-                            endpoint, e.getMessage());
+                    LOGGER.error("JumpTrading建立OrderBookStream连接IOO异常: url={}, errorMessage={}", endpoint, e.getMessage());
                 }
             }
             if (response != null) {

@@ -76,7 +76,7 @@ public class OrderBookStreamHandler {
         Long receiveTime = Instant.now().toEpochMilli();
         JSONObject _times = new JSONObject();
         _times.put("timeA", receiveTime); // 收到时间
-        JSONObject jsonObject = line.trim().startsWith("{") ? new JSONObject(line) : null;
+        JSONObject jsonObject = line.trim().startsWith("{") && line.trim().endsWith("}") ? new JSONObject(line) : null;
         if (jsonObject == null) {
             logger.warn("收到的消息不是json格式, vender={}, url={}, message={}", _VENDER.name(), request.url(), line);
             return;
