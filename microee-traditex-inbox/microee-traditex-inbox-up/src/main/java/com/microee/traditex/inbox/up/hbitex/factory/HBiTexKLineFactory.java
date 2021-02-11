@@ -7,8 +7,10 @@ import java.util.Map;
 import com.microee.plugin.http.assets.HttpClientResult;
 import com.microee.plugin.http.assets.HttpWebsocketListener;
 import com.microee.traditex.inbox.up.CombineMessageListener;
-import com.microee.traditex.inbox.up.hbitex.factory.wshandler.HBiTexWebsocketHandler;
-import com.microee.traditex.inbox.up.hbitex.factory.wshandler.HBiTexWebsocketKLineHandler;
+import com.microee.traditex.inbox.up.hbitex.HBiTexFactory;
+import com.microee.traditex.inbox.up.hbitex.HBiTexFactoryConf;
+import com.microee.traditex.inbox.up.hbitex.HBiTexWebsocketHandler;
+import com.microee.traditex.inbox.up.hbitex.handlers.HBiTexWebsocketKLineHandler;
 
 public class HBiTexKLineFactory extends HBiTexFactory {
 

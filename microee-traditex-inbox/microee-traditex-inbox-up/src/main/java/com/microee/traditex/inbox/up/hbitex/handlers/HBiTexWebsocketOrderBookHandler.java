@@ -1,4 +1,4 @@
-package com.microee.traditex.inbox.up.hbitex.factory.wshandler;
+package com.microee.traditex.inbox.up.hbitex.handlers;
 
 import java.time.Instant;
 
@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import com.microee.plugin.zip.Zip;
 import com.microee.traditex.inbox.up.CombineMessageListener;
 import com.microee.traditex.inbox.up.InBoxMessage;
+import com.microee.traditex.inbox.up.hbitex.HBiTexWebsocketHandler;
 
 import okhttp3.WebSocket;
 import okio.ByteString;

@@ -1,4 +1,4 @@
-package com.microee.traditex.inbox.up.hbitex.factory;
+package com.microee.traditex.inbox.up.hbitex;
 
 import com.microee.plugin.http.assets.HttpClientLogger;
 

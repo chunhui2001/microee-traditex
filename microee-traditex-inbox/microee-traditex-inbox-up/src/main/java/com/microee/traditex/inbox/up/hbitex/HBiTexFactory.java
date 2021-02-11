@@ -1,4 +1,4 @@
-package com.microee.traditex.inbox.up.hbitex.factory;
+package com.microee.traditex.inbox.up.hbitex;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
@@ -19,17 +19,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringJoiner;
 import java.util.TreeMap;
-import java.util.UUID;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableList;
 import com.microee.plugin.http.assets.HttpAssets;
 import com.microee.plugin.http.assets.HttpClient;
@@ -41,14 +40,8 @@ import com.microee.traditex.inbox.oem.connector.ITridexTradFactory;
 import com.microee.traditex.inbox.oem.constrants.ConnectStatus;
 import com.microee.traditex.inbox.oem.hbitex.ApiSignature;
 import com.microee.traditex.inbox.oem.hbitex.HBiTexAccount;
-import com.microee.traditex.inbox.oem.hbitex.HBiTexHttpResult;
-import com.microee.traditex.inbox.oem.hbitex.po.HBiTexOrderPlaceParam;
-import com.microee.traditex.inbox.oem.hbitex.vo.AccountBalance;
-import com.microee.traditex.inbox.oem.hbitex.vo.HBiTexOrderDetails;
-import com.microee.traditex.inbox.oem.hbitex.vo.OrderMatchresults;
 import com.microee.traditex.inbox.up.CombineMessageListener;
 import com.microee.traditex.inbox.up.TradiTexAssists;
-import com.microee.traditex.inbox.up.hbitex.factory.wshandler.HBiTexWebsocketHandler;
 
 import okhttp3.Headers;
 
@@ -56,6 +49,7 @@ public abstract class HBiTexFactory implements ITridexTradFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HBiTexFactory.class); 
     
+    protected final HBiTexProxy proxy;
     protected final HBiTexFactoryConf conf;
     protected final JSONObject auth;
     protected final HttpClient httpClient;
@@ -80,6 +74,7 @@ public abstract class HBiTexFactory implements ITridexTradFactory {
         this.lastTime = null;
         this.lastPing = null;
         this.lease = null;
+        this.proxy = new HBiTexProxy(this);
     }
     
     public Headers headers() {
@@ -97,6 +92,10 @@ public abstract class HBiTexFactory implements ITridexTradFactory {
     public HBiTexFactory createWebSocket() {
         this.wsHttpClient.websocket(this.conf.wshost, this.headers(), this.wsListener());
         return this;
+    }
+    
+    public HBiTexProxy proxy() {
+    	return this.proxy;
     }
     
     @Override
@@ -337,7 +336,7 @@ public abstract class HBiTexFactory implements ITridexTradFactory {
 
     public static String encoderbase64(byte[] str)  {
         try {
-            return new String(new org.apache.commons.codec.binary.Base64().encode(str), StandardCharsets.UTF_8.name());
+            return new String(new Base64().encode(str), StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -394,241 +393,6 @@ public abstract class HBiTexFactory implements ITridexTradFactory {
         map.put(ApiSignature.op, ApiSignature.opValue);
         map.put("cid", System.currentTimeMillis() + "");
         this.wsHandler().writeMessage(HttpAssets.toJsonString(map));
-    }
-    
-    /**
-     * 订阅相关交易对盘口深度
-     * 
-     * @param tickers
-     */
-    public void subscribeDepth(String... tickers) {
-        for (String ticker : tickers) {
-            if (ticker == null || ticker.trim().isEmpty()) {
-                continue;
-            }
-            //@formatter:off
-            String message = String.format("{\"id\":\"%s\",\"sub\":\"market.%s.depth.step0\",\"pick\":[\"asks.30\",\"bids.30\"]}", UUID.randomUUID().toString(), ticker);
-            //@formatter:on
-            this.wsHandler().writeMessage(message);
-        }
-    }
-    
-    /**
-     * 取消订阅
-     */
-    public void unsub(String step, String... tickers) {
-        // {"id":"28a1342d-49a8-4c81-a903-86700f655251","sub":"market.ltcht.depth.step0","pick":["asks.5","bids.5"]}
-        // { "unsub": "topic to unsub", "id": "id generate by client" }
-        for (String ticker : tickers) {
-            if (ticker == null || ticker.trim().isEmpty()) {
-                continue;
-            }
-            JSONObject json = new JSONObject();
-            json.put("unsub", String.format("market.%s.depth.%s", ticker, step));
-            json.put("id", UUID.randomUUID().toString());
-            this.wsHandler().writeMessage(json.toString());
-        }
-    }
-
-    /**
-     * 取消订阅资产或订单状态变动
-     * @param topic
-     */
-    public void unsubtopic(String topic) {
-        JSONObject json = new JSONObject();
-        json.put("op", "unsub");
-        json.put("topic", topic);
-        json.put("cid", UUID.randomUUID().toString());
-        this.wsHandler().writeMessage(json.toString());
-    }
-    
-    /**
-     * 订阅相关交易对盘口深度
-     * 
-     * @param tickers
-     */
-    public void subscribeDepth(String step, Integer pick, String... tickers) {
-        for (String ticker : tickers) {
-            if (ticker == null || ticker.trim().isEmpty()) {
-                continue;
-            }
-            String pickExp = "";
-            if (pick != -1) {
-                pickExp = String.format(",\"pick\":[\"asks.%s\",\"bids.%s\"]", pick, pick);
-            }
-            String message = String.format("{\"id\":\"%s\",\"sub\":\"market.%s.depth.%s\"%s}", UUID.randomUUID().toString(), ticker, step, pickExp);
-            this.wsHandler().writeMessage(message);
-        }
-    }
-
-    /**
-     * 查询交易对列表
-     * @param resthost
-     * @param orderId
-     * @return
-     */
-    public HBiTexHttpResult<List<Map<String, Object>>> querySymbols(String resthost) {
-        String endpoint = String.format("%s/v1/common/symbols", resthost);
-        HttpClientResult httpClientResult = this.doGet(endpoint, null);
-        return HttpAssets.parseJson(httpClientResult.getResult(), new TypeReference<HBiTexHttpResult<List<Map<String, Object>>>>() {});
-    }
-
-    /**
-     * 查询订单详情
-     * @param resthost
-     * @param orderId
-     * @return
-     */
-    public HBiTexHttpResult<HBiTexOrderDetails> queryOrderDetail(String resthost, String orderId) {
-        HBiTexAccount hbiTexAccount = this.getAccount();
-        String endpoint = String.format("%s/v1/order/orders/%s", resthost, orderId);
-        HttpClientResult httpClientResult = this.doGet(endpoint, null, hbiTexAccount);
-        return HttpAssets.parseJson(httpClientResult.getResult(), new TypeReference<HBiTexHttpResult<HBiTexOrderDetails>>() {});
-    }
-    /**
-     * 查询订单详情
-     * @param resthost
-     * @param orderId
-     * @return
-     */
-    public HBiTexHttpResult<List<HBiTexOrderDetails>> queryOrders(String resthost, String symbol, String states) {
-        HBiTexAccount hbiTexAccount = this.getAccount();
-        String endpoint = String.format("%s/v1/order/orders", resthost);
-        Map<String, Object> queryMap = new HashMap<>();
-        queryMap.put("symbol", symbol);
-        queryMap.put("states", states);
-        HttpClientResult httpClientResult = this.doGet(endpoint, queryMap, hbiTexAccount);
-        return HttpAssets.parseJson(httpClientResult.getResult(), new TypeReference<HBiTexHttpResult<List<HBiTexOrderDetails>>>() {});
-    }
-    
-    /**
-     * 根据客户端订单id查询订单详情
-     * @param resthost
-     * @param clientOrderId
-     * @return
-     */
-    public HBiTexHttpResult<HBiTexOrderDetails> queryOrderByClientId(String resthost,
-            String clientOrderId) {
-        HBiTexAccount hbiTexAccount = this.getAccount();
-        String endpoint = String.format("%s/v1/order/orders/getClientOrder", resthost);
-        Map<String, Object> queryMap = new HashMap<>();
-        queryMap.put("clientOrderId", clientOrderId);
-        HttpClientResult httpClientResult = this.doGet(endpoint, queryMap, hbiTexAccount);
-        return HttpAssets.parseJson(httpClientResult.getResult(), new TypeReference<HBiTexHttpResult<HBiTexOrderDetails>>() {});
-    }
-    
-    /**
-     * 创建订单
-     * @param clientOrderId
-     * @param orderType
-     * @param price
-     * @param amount
-     * @param side
-     */
-    public HBiTexHttpResult<String> createOrder(String resthost, HBiTexOrderPlaceParam orderPlaceParam) {
-        HBiTexAccount hbiTexAccount = this.getAccount();
-        String endpoint = String.format("%s/v1/order/orders/place", resthost);
-        orderPlaceParam.setAccountId(hbiTexAccount.getAccountSpotId());
-        HttpClientResult httpClientResult = this.doPost(endpoint, orderPlaceParam, hbiTexAccount);
-        return HttpAssets.parseJson(httpClientResult.getResult(), new TypeReference<HBiTexHttpResult<String>>() {});
-    }
-
-    
-    /**
-     * 创建订单
-     * @param clientOrderId
-     * @param orderType
-     * @param price
-     * @param amount
-     * @param side
-     */
-    public static HBiTexHttpResult<String> createOrder(HttpClient httpClient, Headers headers, String resthost, HBiTexAccount hbiTexAccount, HBiTexOrderPlaceParam orderPlaceParam) {
-        String endpoint = String.format("%s/v1/order/orders/place", resthost);
-        orderPlaceParam.setAccountId(hbiTexAccount.getAccountSpotId());
-        HttpClientResult httpClientResult = doPostParam(httpClient, headers, endpoint, orderPlaceParam, hbiTexAccount);
-        return HttpAssets.parseJson(httpClientResult.getResult(), new TypeReference<HBiTexHttpResult<String>>() {});
-    }
-
-    // symbol btcjpy
-    // 订阅订单更新, 相比现有用户订单更新推送主题“orders.$symbol”， 新增主题“orders.$symbol.update”拥有更低的数据延迟以及更准确的消息顺序
-    public void subOrderStat(String symbol) {
-        String payload = String.format("{\"op\": \"sub\",\"cid\": \"%s\",\"topic\": \"orders.%s.update\"}", UUID.randomUUID().toString(), symbol);
-        LOGGER.info("订阅订单状态变化: symbol={}, payload={}", symbol, payload);
-        this.wsHandler().writeMessage(payload);
-    }
-    
-    /**
-     * 撤单
-     * @param resthost
-     * @param orderId
-     * @return
-     */
-    public HBiTexHttpResult<String> revokeOrder(String resthost, String orderId) {
-        HBiTexAccount hbiTexAccount = this.getAccount();
-        String endpoint = String.format("%s/v1/order/orders/%s/submitcancel", resthost, orderId);
-        HttpClientResult httpClientResult = this.doPost(endpoint, null, hbiTexAccount);
-        return HttpAssets.parseJson(httpClientResult.getResult(), new TypeReference<HBiTexHttpResult<String>>() {});
-    }
-    
-    /**
-     * 批量撤单
-     * @param resthost
-     * @param orderId
-     * @return
-     */
-    public HBiTexHttpResult<Map<String, Object>> revokeOrder(String resthost, String[] orderId) {
-        HBiTexAccount hbiTexAccount = this.getAccount();
-        String endpoint = String.format("%s/v1/order/orders/batchcancel", resthost);
-        JSONObject param = new JSONObject();
-        param.put("order-ids", orderId);
-        HttpClientResult httpClientResult = this.doPost(endpoint, param, hbiTexAccount);
-        return HttpAssets.parseJson(httpClientResult.getResult(), new TypeReference<HBiTexHttpResult<Map<String, Object>>>() {});
-    }
-
-    /**
-     * 查询账户信息
-     * @param resthost
-     * @return
-     */
-    public HBiTexHttpResult<List<Map<String, Object>>> queryAccounts(String resthost) {
-        HBiTexAccount hbiTexAccount = this.getAccount();
-        String endpoint = String.format("%s/v1/account/accounts", resthost);
-        HttpClientResult httpClientResult = this.doGet(endpoint, null, hbiTexAccount);
-        if (httpClientResult == null) {
-            return null;
-        }
-        return HttpAssets.parseJson(httpClientResult.getResult(), new TypeReference<HBiTexHttpResult<List<Map<String, Object>>>>() {});
-    }
-    
-    // 订阅账户资产变动
-    public void subAccount() {
-        String payload = String.format("{\"op\": \"sub\",\"cid\": \"%s\",\"topic\": \"accounts\",\"model\": \"0\"}", UUID.randomUUID().toString());
-        this.wsHandler().writeMessage(payload);
-    }
-
-    /**
-     * 查询订单撮合详情
-     * @param resthost
-     * @param orderId
-     * @return
-     */
-    public HBiTexHttpResult<List<OrderMatchresults>> queryOrderMatchresults(String resthost, String orderId) {
-        HBiTexAccount hbiTexAccount = this.getAccount();
-        String endpoint =  resthost + "/v1/order/orders/" + orderId + "/matchresults";
-        HttpClientResult httpClientResult = this.doGet(endpoint, null, hbiTexAccount);
-        return HttpAssets.parseJson(httpClientResult.getResult(), new TypeReference<HBiTexHttpResult<List<OrderMatchresults>>>() {});
-    }
-
-    /**
-     * 查询账户余额
-     * @param resthost
-     * @return
-     */
-    public HBiTexHttpResult<AccountBalance> querySpotAccountBalance(String resthost) {
-        HBiTexAccount hbiTexAccount = this.getAccount();
-        String endpoint = String.format("%s/v1/account/accounts/%s/balance", resthost, hbiTexAccount.getAccountSpotId());
-        HttpClientResult httpClientResult = this.doGet(endpoint, null, hbiTexAccount);
-        return HttpAssets.parseJson(httpClientResult.getResult(), new TypeReference<HBiTexHttpResult<AccountBalance>>() {});
     }
 
     @Override

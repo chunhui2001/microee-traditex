@@ -65,8 +65,8 @@ public interface ITradiTexHBiTexOrderRMi {
 
     // #### order
     // 撤单
-    @RequestMapping(value = "/revoke", method = RequestMethod.POST,
+    @RequestMapping(value = "/cancelOrder", method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public R<?> revoke(@RequestParam("connid") String connid,
+    public R<?> cancelOrder(@RequestParam("connid") String connid,
             @RequestParam("resthost") String resthost, @RequestParam("order-ids") String[] orderId);
 }

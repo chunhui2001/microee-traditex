@@ -4,8 +4,10 @@ import java.net.InetSocketAddress;
 
 import com.microee.plugin.http.assets.HttpWebsocketListener;
 import com.microee.traditex.inbox.up.CombineMessageListener;
-import com.microee.traditex.inbox.up.hbitex.factory.wshandler.HBiTexWebsocketAccountBalanceHandler;
-import com.microee.traditex.inbox.up.hbitex.factory.wshandler.HBiTexWebsocketHandler;
+import com.microee.traditex.inbox.up.hbitex.HBiTexFactory;
+import com.microee.traditex.inbox.up.hbitex.HBiTexFactoryConf;
+import com.microee.traditex.inbox.up.hbitex.HBiTexWebsocketHandler;
+import com.microee.traditex.inbox.up.hbitex.handlers.HBiTexWebsocketAccountBalanceHandler;
 
 public class HBiTexAccountBalanceFactory extends HBiTexFactory {
 

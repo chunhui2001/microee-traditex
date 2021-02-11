@@ -1,4 +1,4 @@
-package com.microee.traditex.inbox.up.hbitex.factory.wshandler;
+package com.microee.traditex.inbox.up.hbitex;
 
 import java.time.Instant;
 

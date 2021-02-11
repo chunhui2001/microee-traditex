@@ -10,7 +10,7 @@ import com.microee.traditex.inbox.oem.connector.TradiTexConnection;
 import com.microee.traditex.inbox.oem.constrants.ConnectStatus;
 import com.microee.traditex.inbox.up.b2c2.B2C2Factory;
 import com.microee.traditex.inbox.up.cumberland.CumberLandFactory;
-import com.microee.traditex.inbox.up.hbitex.factory.HBiTexFactory;
+import com.microee.traditex.inbox.up.hbitex.HBiTexFactory;
 import com.microee.traditex.inbox.up.jumptrading.JumpTradingFactory;
 import com.microee.traditex.inbox.up.oanda.OandaTradFactory;
 

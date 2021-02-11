@@ -1,4 +1,4 @@
-package com.microee.traditex.inbox.up.hbitex.factory;
+package com.microee.traditex.inbox.up.hbitex;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.atomic.AtomicInteger;

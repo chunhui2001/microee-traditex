@@ -22,7 +22,7 @@ import com.microee.traditex.inbox.oem.connector.TradiTexConnection;
 import com.microee.traditex.inbox.oem.hbitex.HBiTexHttpResult;
 import com.microee.traditex.inbox.oem.hbitex.vo.AccountBalance;
 import com.microee.traditex.inbox.oem.hbitex.vo.AccountBalanceList;
-import com.microee.traditex.inbox.up.hbitex.factory.HBiTexFactory;
+import com.microee.traditex.inbox.up.hbitex.HBiTexFactory;
 
 import okhttp3.Headers;
 
@@ -52,8 +52,7 @@ public class TradiTexHBiTexAccountRestful implements ITradiTexHBiTexAccountRMi {
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdFun(connid, conn).connIdIllegalHbiTex(connid);
         HBiTexFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexFactory.class);
-        HBiTexHttpResult<List<Map<String, Object>>> hbiTexResult =
-                hbiTexTradFactory.queryAccounts(resthost);
+        HBiTexHttpResult<List<Map<String, Object>>> hbiTexResult = hbiTexTradFactory.proxy().queryAccounts(resthost);
         if (hbiTexResult == null) {
             return R.failed(null);
         }
@@ -93,8 +92,7 @@ public class TradiTexHBiTexAccountRestful implements ITradiTexHBiTexAccountRMi {
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdFun(connid, conn).connIdIllegalHbiTex(connid);
         HBiTexFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexFactory.class);
-        HBiTexHttpResult<AccountBalance> hbiTexResult =
-                hbiTexTradFactory.querySpotAccountBalance(resthost);
+        HBiTexHttpResult<AccountBalance> hbiTexResult = hbiTexTradFactory.proxy().querySpotAccountBalance(resthost);
         if (!hbiTexResult.isSuccess()) {
             return R.failed(hbiTexResult.getErrCode() + "`" + hbiTexResult.getErrMsg() + "`");
         }

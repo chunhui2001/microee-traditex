@@ -38,8 +38,8 @@ import com.microee.traditex.inbox.oem.connector.TradiTexConnection;
 import com.microee.traditex.inbox.oem.hbitex.ConnectType;
 import com.microee.traditex.inbox.up.b2c2.B2C2Factory;
 import com.microee.traditex.inbox.up.cumberland.CumberLandFactory;
+import com.microee.traditex.inbox.up.hbitex.HBiTexFactoryConf;
 import com.microee.traditex.inbox.up.hbitex.factory.HBiTexAccountBalanceFactory;
-import com.microee.traditex.inbox.up.hbitex.factory.HBiTexFactoryConf;
 import com.microee.traditex.inbox.up.hbitex.factory.HBiTexKLineFactory;
 import com.microee.traditex.inbox.up.hbitex.factory.HBiTexOrderBookFactory;
 import com.microee.traditex.inbox.up.jumptrading.JumpTradingFactory;
@@ -283,7 +283,7 @@ public class TradiTexConnectorRestful implements ITradiTexConnectorRMi {
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdValid(connid).connIdFun(connid, conn).connIdIllegalHbiTex(connid);
         HBiTexOrderBookFactory hbiTexTradFactory = (HBiTexOrderBookFactory) conn.getFactory();
-        hbiTexTradFactory.subscribeDepth(step, -1, symbol);
+        hbiTexTradFactory.proxy().subscribeDepth(step, -1, symbol);
         return R.ok(true);
     }
 
@@ -299,7 +299,7 @@ public class TradiTexConnectorRestful implements ITradiTexConnectorRMi {
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdValid(connid).connIdFun(connid, conn).connIdIllegalHbiTex(connid);
         HBiTexOrderBookFactory hbiTexTradFactory = (HBiTexOrderBookFactory) conn.getFactory();
-        hbiTexTradFactory.unsub(step, symbol);
+        hbiTexTradFactory.proxy().unsub(step, symbol);
         return R.ok(true);
     }
 
@@ -314,7 +314,7 @@ public class TradiTexConnectorRestful implements ITradiTexConnectorRMi {
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdValid(connid).connIdFun(connid, conn).connIdIllegalHbiTex(connid);
         HBiTexAccountBalanceFactory hbiTexTradFactory = (HBiTexAccountBalanceFactory) conn.getFactory();
-        hbiTexTradFactory.unsubtopic(topic);
+        hbiTexTradFactory.proxy().unsubtopic(topic);
         return R.ok(true);
     }
     
@@ -379,7 +379,7 @@ public class TradiTexConnectorRestful implements ITradiTexConnectorRMi {
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdFun(connid, conn).connIdIllegalHbiTex(connid);
         HBiTexAccountBalanceFactory hbiTexTradFactory = (HBiTexAccountBalanceFactory) conn.getFactory();
-        hbiTexTradFactory.subAccount();
+        hbiTexTradFactory.proxy().subAccount();
         return R.ok(true);
     }
 
@@ -395,7 +395,7 @@ public class TradiTexConnectorRestful implements ITradiTexConnectorRMi {
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdFun(connid, conn).connIdIllegalHbiTex(connid);
         HBiTexAccountBalanceFactory hbiTexTradFactory = (HBiTexAccountBalanceFactory) conn.getFactory();
-        hbiTexTradFactory.subOrderStat(symbol);
+        hbiTexTradFactory.proxy().subOrderStat(symbol);
         return R.ok(true);
     }
 
