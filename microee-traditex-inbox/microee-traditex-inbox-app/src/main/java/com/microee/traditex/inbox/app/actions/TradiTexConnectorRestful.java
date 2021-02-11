@@ -8,7 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.Assertions;
 import org.hashids.Hashids;
@@ -16,11 +18,13 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
 import com.microee.plugin.commons.UUIDObject;
 import com.microee.plugin.http.assets.HttpClientLogger;
 import com.microee.plugin.http.assets.HttpSSLFactory;
@@ -34,9 +38,13 @@ import com.microee.traditex.inbox.oem.connector.TradiTexConnection;
 import com.microee.traditex.inbox.oem.hbitex.ConnectType;
 import com.microee.traditex.inbox.up.b2c2.B2C2Factory;
 import com.microee.traditex.inbox.up.cumberland.CumberLandFactory;
-import com.microee.traditex.inbox.up.hbitex.HBiTexTradFactory;
+import com.microee.traditex.inbox.up.hbitex.factory.HBiTexAccountBalanceFactory;
+import com.microee.traditex.inbox.up.hbitex.factory.HBiTexFactoryConf;
+import com.microee.traditex.inbox.up.hbitex.factory.HBiTexKLineFactory;
+import com.microee.traditex.inbox.up.hbitex.factory.HBiTexOrderBookFactory;
 import com.microee.traditex.inbox.up.jumptrading.JumpTradingFactory;
 import com.microee.traditex.inbox.up.oanda.OandaTradFactory;
+
 import okhttp3.Headers;
 
 /**
@@ -68,8 +76,7 @@ public class TradiTexConnectorRestful implements ITradiTexConnectorRMi {
     private CombineMessage combineMessageComponent;
 
     // #### 生成一个连接ID
-    @RequestMapping(value = "/genid", method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/genid", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public R<String> genid() {
         Long randomLong = null;
         String connid = null;
@@ -85,8 +92,7 @@ public class TradiTexConnectorRestful implements ITradiTexConnectorRMi {
     }
 
     // ### 查看连接详情
-    @RequestMapping(value = "/get", method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/get", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public R<Map<String, JSONObject>> get(@RequestParam("connid") String connid) { 
         Map<String, JSONObject> map = connectionComponent.connections();
         if (!map.containsKey(connid)) {
@@ -98,32 +104,30 @@ public class TradiTexConnectorRestful implements ITradiTexConnectorRMi {
     }
     
     // ### 查看所有连接
-    @RequestMapping(value = "/conns", method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/conns", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public R<Map<String, JSONObject>> conns() {
         return R.ok(connectionComponent.connections());
     }
 
     // ### 关闭所有连接
-    @RequestMapping(value = "/shutdown", method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/shutdown", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public R<Set<String>> shutdown(@RequestBody String[] connids) {
         return R.ok(connectionComponent.shutdown(connids));
     }
     
     // ### 销毁一个连接
-    @RequestMapping(value = "/destroy", method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public R<Set<String>> destroy(@RequestParam("connid") String connid,
-            @RequestParam("ONE_TIME_PASSWORD") String otp) {
+    @RequestMapping(value = "/destroy", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public R<Set<String>> destroy(
+    		@RequestParam("connid") String connid,
+            @RequestParam("ONE_TIME_PASSWORD") String otp
+    ) {
         Assertions.assertThat(connid).withFailMessage("%s 必传", "connid").isNotBlank();
         Assertions.assertThat(otp).withFailMessage("%s 必传", "ONE_TIME_PASSWORD").isNotBlank();
         return this.shutdown(new String[] { connid }); 
     }
 
     // ### ping一个连接, 延长该连接的存活时间
-    @RequestMapping(value = "/ping", method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/ping", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public R<Long> ping(@RequestParam("connid") String connid) {
         Assertions.assertThat(connid).withFailMessage("connid is required in query string").isNotBlank();
         Assertions.assertThat(connectionComponent.hasKey(connid)).withFailMessage("connid not exists").isTrue();
@@ -138,14 +142,15 @@ public class TradiTexConnectorRestful implements ITradiTexConnectorRMi {
 
     // ### B2C2 orderbook
     // 建立 b2c2 orderbook ws, 返回新建立的 websocket 的唯一ID
-    @RequestMapping(value = "/b2c2/orderbook/new", method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public R<String> b2c2OrderBookNew(@RequestParam("connid") String connid,
+    @RequestMapping(value = "/b2c2/orderbook/new", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public R<String> b2c2OrderBookNew(
+    		@RequestParam("connid") String connid,
             @RequestParam("wsHost") String wsHost,
             @RequestParam("restHost") String restHost,
             @RequestParam("accessToken") String accessToken,
             @RequestParam(value = "proxy-address", required = false) String proxyAddress,
-            @RequestParam(value = "proxy-port", required = false) Integer proxyPost) {
+            @RequestParam(value = "proxy-port", required = false) Integer proxyPost
+    ) {
         Assertions.assertThat(connid).withFailMessage("%s 必传", "connid").isNotBlank();
         Assertions.assertThat(wsHost).withFailMessage("%s 必传", "wsHost").isNotBlank();
         Assertions.assertThat(restHost).withFailMessage("%s 必传", "restHost").isNotBlank();
@@ -162,14 +167,15 @@ public class TradiTexConnectorRestful implements ITradiTexConnectorRMi {
 
     // ### JumpTrading orderbook
     // 建立 JumpTrading orderbook ws, 返回新建立的 websocket 的唯一ID
-    @RequestMapping(value = "/jumptrading/orderbook/new", method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public R<String> jumpTradingOrderBookNew(@RequestParam("connid") String connid,
+    @RequestMapping(value = "/jumptrading/orderbook/new", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public R<String> jumpTradingOrderBookNew(
+    		@RequestParam("connid") String connid,
             @RequestParam("streamHost") String streamHost,
             @RequestParam("apiKey") String apiKey,
             @RequestParam("secret") String secret,
             @RequestParam(value = "proxy-address", required = false) String proxyAddress,
-            @RequestParam(value = "proxy-port", required = false) Integer proxyPost) {
+            @RequestParam(value = "proxy-port", required = false) Integer proxyPost
+    ) {
         Assertions.assertThat(connid).withFailMessage("%s 必传", "connid").isNotBlank();
         Assertions.assertThat(streamHost).withFailMessage("%s 必传", "streamHost").isNotBlank();
         Assertions.assertThat(apiKey).withFailMessage("%s 必传", "apiKey").isNotBlank();
@@ -186,16 +192,17 @@ public class TradiTexConnectorRestful implements ITradiTexConnectorRMi {
 
     // ### CumberLand orderbook
     // 建立 CumberLand orderbook ws, 返回新建立的 websocket 的唯一ID
-    @RequestMapping(value = "/cumberland/orderbook/new", method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public R<String> cumberlandOrderBookNew(@RequestParam("connid") String connid,
+    @RequestMapping(value = "/cumberland/orderbook/new", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public R<String> cumberlandOrderBookNew(
+    		@RequestParam("connid") String connid,
             @RequestParam("cbHost") String cbHost,
             @RequestParam("counterPartyId") String counterPartyId,
             @RequestParam("userId") String userId,
             @RequestParam("sslfile") MultipartFile sslfile, 
             @RequestParam("sslPassword") String sslPassword,
             @RequestParam(value = "proxy-address", required = false) String proxyAddress,
-            @RequestParam(value = "proxy-port", required = false) Integer proxyPost) throws IOException {
+            @RequestParam(value = "proxy-port", required = false) Integer proxyPost
+    ) throws IOException {
         Assertions.assertThat(connid).withFailMessage("%s 必传", "connid").isNotBlank();
         Assertions.assertThat(cbHost).withFailMessage("%s 必传", "cbHost").isNotBlank();
         Assertions.assertThat(counterPartyId).withFailMessage("%s 必传", "counterPartyId").isNotBlank();
@@ -220,101 +227,131 @@ public class TradiTexConnectorRestful implements ITradiTexConnectorRMi {
 
     // ### HBiTexTrade orderbook
     // 建立 HBiTexTrade orderbook ws, 返回新建立的 websocket 的唯一ID
-    @RequestMapping(value = "/hbitex/orderbook/new", method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public R<String> hbitexOrderBookNew(@RequestParam("connid") String connid,
-            @RequestParam("wshost") String wshost,
-            @RequestParam("exchangeCode") String exchangeCode,
-            @RequestParam(value = "proxy-address", required = false) String proxyAddress,
-            @RequestParam(value = "proxy-port", required = false) Integer proxyPost) {
+    @RequestMapping(value = "/hbitex/orderbook/new", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public R<String> hbitexOrderBookNew(
+    		@RequestHeader("connid") String connid,
+            @RequestHeader("exchangeCode") String exchangeCode,
+            @RequestHeader(value = "proxy-address", required = false) String proxyAddr,
+            @RequestHeader(value = "proxy-port", required = false) Integer proxyPost,
+            @RequestParam("wshost") String wshost
+    ) {
         Assertions.assertThat(wshost).withFailMessage("%s 必传", "wshost").isNotBlank();
         Assertions.assertThat(exchangeCode).withFailMessage("%s 必传", "exchangeCode").isNotBlank();
         restValidator.connIdValid(connid);
-        InetSocketAddress proxy =
-                proxyAddress == null ? null : new InetSocketAddress(proxyAddress, proxyPost);
+        InetSocketAddress proxy = StringUtils.isBlank(proxyAddr) ? null : new InetSocketAddress(proxyAddr, proxyPost);
         ITridexTradFactory factory = connectionComponent.factory(connid);
         restValidator.validateStaus(connid, factory);
-        HBiTexTradFactory hbiTexTradFactory = new HBiTexTradFactory(connid, wshost, exchangeCode, ConnectType.ORDER_BOOK, combineMessageComponent, proxy, httpClientLogger);
-        connectionComponent.add(connid, hbiTexTradFactory);
-        hbiTexTradFactory.connect(false);
+        HBiTexFactoryConf conf = new HBiTexFactoryConf("HBiText订单薄", connid, null, wshost, exchangeCode, "hbitex-websocket-orderbook-thread", httpClientLogger);
+        HBiTexOrderBookFactory orderBookFactory = new HBiTexOrderBookFactory(conf, combineMessageComponent, proxy);
+        connectionComponent.add(connid, orderBookFactory);
+        orderBookFactory.connect(false);
+        return R.ok(connid);
+    }
+
+    // ### HBiTexTrade K线
+    // 建立 HBiTexTrade K线 ws, 返回新建立的 websocket 的唯一ID
+    @RequestMapping(value = "/hbitex/kline/new", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public R<String> hbitexKLineNew(
+    		@RequestHeader("connid") String connid,
+            @RequestHeader("exchangeCode") String exchangeCode,
+            @RequestHeader(value = "proxy-address", required = false) String proxyAddr,
+            @RequestHeader(value = "proxy-port", required = false) Integer proxyPost,
+            @RequestParam("wshost") String wshost
+    ) {
+        Assertions.assertThat(wshost).withFailMessage("%s 必传", "wshost").isNotBlank();
+        Assertions.assertThat(exchangeCode).withFailMessage("%s 必传", "exchangeCode").isNotBlank();
+        restValidator.connIdValid(connid);
+        InetSocketAddress proxy = StringUtils.isBlank(proxyAddr) ? null : new InetSocketAddress(proxyAddr, proxyPost);
+        ITridexTradFactory factory = connectionComponent.factory(connid);
+        restValidator.validateStaus(connid, factory);
+        HBiTexFactoryConf conf = new HBiTexFactoryConf("HBiTextK线", connid, null, wshost, exchangeCode, "hbitex-websocket-kline-thread", httpClientLogger);
+        HBiTexKLineFactory orderBookFactory = new HBiTexKLineFactory(conf, combineMessageComponent, proxy);
+        connectionComponent.add(connid, orderBookFactory);
+        orderBookFactory.connect(false);
         return R.ok(connid);
     }
 
     // ### 订阅 HBiTexTrade orderbook 变动
-    @RequestMapping(value = "/hbitex/orderbook/sub", method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public R<Boolean> hbitexOrderBookSub(@RequestParam("connid") String connid,
-            @RequestParam("step") String step, @RequestParam("symbol") String symbol) {
+    @RequestMapping(value = "/hbitex/orderbook/sub", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public R<Boolean> hbitexOrderBookSub(
+    		@RequestHeader("connid") String connid,
+            @RequestParam("step") String step, 
+            @RequestParam("symbol") String symbol
+    ) {
         Assertions.assertThat(step).withFailMessage("%s 必传", "step").isNotBlank();
         Assertions.assertThat(symbol).withFailMessage("%s 必传", "symbol").isNotBlank();
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdValid(connid).connIdFun(connid, conn).connIdIllegalHbiTex(connid);
-        HBiTexTradFactory hbiTexTradFactory = (HBiTexTradFactory) conn.getFactory();
+        HBiTexOrderBookFactory hbiTexTradFactory = (HBiTexOrderBookFactory) conn.getFactory();
         hbiTexTradFactory.subscribeDepth(step, -1, symbol);
         return R.ok(true);
     }
 
     // ### 取消订阅 HBiTexTrade orderbook 变动
-    @RequestMapping(value = "/hbitex/orderbook/unsub", method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public R<Boolean> hbitexOrderBookUnsub(@RequestParam("connid") String connid,
-            @RequestParam("step") String step, @RequestParam("symbol") String symbol) {
+    @RequestMapping(value = "/hbitex/orderbook/unsub", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public R<Boolean> hbitexOrderBookUnsub(
+    		@RequestHeader("connid") String connid,
+            @RequestParam("step") String step, 
+            @RequestParam("symbol") String symbol
+    ) {
         Assertions.assertThat(step).withFailMessage("%s 必传", "step").isNotBlank();
         Assertions.assertThat(symbol).withFailMessage("%s 必传", "symbol").isNotBlank();
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdValid(connid).connIdFun(connid, conn).connIdIllegalHbiTex(connid);
-        HBiTexTradFactory hbiTexTradFactory = (HBiTexTradFactory) conn.getFactory();
+        HBiTexOrderBookFactory hbiTexTradFactory = (HBiTexOrderBookFactory) conn.getFactory();
         hbiTexTradFactory.unsub(step, symbol);
         return R.ok(true);
     }
 
     // ### 取消订阅资产或订单状态变动
-    @RequestMapping(value = "/hbitex/orderbalance/unsub", method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public R<Boolean> hbitexOrderBalanceUnsub(@RequestParam("connid") String connid,
-            @RequestParam("topic") String topic) {
+    @RequestMapping(value = "/hbitex/orderbalance/unsub", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public R<Boolean> hbitexOrderBalanceUnsub(
+    		@RequestHeader("connid") String connid,
+            @RequestParam("topic") String topic
+    ) {
         restValidator.connIdValid(connid);
         Assertions.assertThat(topic).withFailMessage("%s 必传", "topic").isNotBlank();
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdValid(connid).connIdFun(connid, conn).connIdIllegalHbiTex(connid);
-        HBiTexTradFactory hbiTexTradFactory = (HBiTexTradFactory) conn.getFactory();
+        HBiTexAccountBalanceFactory hbiTexTradFactory = (HBiTexAccountBalanceFactory) conn.getFactory();
         hbiTexTradFactory.unsubtopic(topic);
         return R.ok(true);
     }
     
     // ### HBiTexTrade orderbalance
     // 建立 HBiTexTrade orderbalance ws, 返回新建立的 websocket 的唯一ID
-    @RequestMapping(value = "/hbitex/orderbalance/new", method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public R<String> hbitexOrderBalanceNew(@RequestParam("connid") String connid,
-            @RequestParam("wshost") String wshost,
-            @RequestParam("exchangeCode") String exchangeCode,
-            @RequestParam("uid") String uid,
-            @RequestParam(value = "proxy-address", required = false) String proxyAddress,
-            @RequestParam(value = "proxy-port", required = false) Integer proxyPost) {
+    @RequestMapping(value = "/hbitex/orderbalance/new", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public R<String> hbitexOrderBalanceNew(
+    		@RequestHeader("connid") String connid,
+    		@RequestHeader("exchangeCode") String exchangeCode,
+    		@RequestHeader("uid") String uid,
+    		@RequestHeader(value = "proxy-address", required = false) String proxyAddress,
+    		@RequestHeader(value = "proxy-port", required = false) Integer proxyPost,
+    		@RequestParam("wshost") String wshost
+    ) {
         Assertions.assertThat(wshost).withFailMessage("%s 必传", "wshost").isNotBlank();
         Assertions.assertThat(exchangeCode).withFailMessage("%s 必传", "exchangeCode").isNotBlank();
         Assertions.assertThat(uid).withFailMessage("%s 必传", "uid").isNotBlank();
         restValidator.connIdValid(connid);
         ITridexTradFactory factory = connectionComponent.factory(connid);
         restValidator.validateStaus(connid, factory);
-        InetSocketAddress proxy =
-                proxyAddress == null ? null : new InetSocketAddress(proxyAddress, proxyPost);
-        HBiTexTradFactory hbiTexTradFactory = new HBiTexTradFactory(connid, uid, wshost, exchangeCode,
-                ConnectType.ORDER_BALANCE, combineMessageComponent, proxy, httpClientLogger);
+        InetSocketAddress proxy = proxyAddress == null ? null : new InetSocketAddress(proxyAddress, proxyPost);
+        HBiTexFactoryConf conf = new HBiTexFactoryConf("HBiText账户资产", connid, uid, wshost, exchangeCode, "hbitex-websocket-accountbalance-thread", httpClientLogger);
+        HBiTexAccountBalanceFactory hbiTexTradFactory = new HBiTexAccountBalanceFactory(conf, combineMessageComponent, proxy);
         connectionComponent.add(connid, hbiTexTradFactory).connect(false);
         return R.ok(connid);
     }
 
     // ### HBiTexTrade orderbalance
     // orderbalance 登录成功后, 返回一个一次性口令, 代替后续需要提供 accessKey 的鉴权
-    @RequestMapping(value = "/hbitex/orderbalance/login", method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public R<String> hbitexOrderBalanceLogin(@RequestParam("connid") String connid,
-            @RequestParam("uid") String uid, 
-            @RequestParam(value = "accountId", required=false) String accountId,
-            @RequestParam("accessKey") String accessKey,
-            @RequestParam("secretKey") String secretKey) {
+    @RequestMapping(value = "/hbitex/orderbalance/login", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public R<String> hbitexOrderBalanceLogin(
+    		@RequestHeader("connid") String connid,
+    		@RequestHeader("uid") String uid,
+            @RequestHeader("accessKey") String accessKey,
+            @RequestHeader("secretKey") String secretKey, 
+            @RequestParam(value = "accountId", required=false) String accountId
+    ) {
         Assertions.assertThat(uid).withFailMessage("%s 必传", "uid").isNotBlank();
         //Assertions.assertThat(accountId).withFailMessage("%s 必传", "accountId").isNotBlank();
         Assertions.assertThat(accessKey).withFailMessage("%s 必传", "accessKey").isNotBlank();
@@ -322,7 +359,7 @@ public class TradiTexConnectorRestful implements ITradiTexConnectorRMi {
         restValidator.connIdValid(connid);
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdFun(connid, conn).connIdIllegalHbiTex(connid);
-        HBiTexTradFactory hbiTexTradFactory = (HBiTexTradFactory) conn.getFactory();
+        HBiTexAccountBalanceFactory hbiTexTradFactory = (HBiTexAccountBalanceFactory) conn.getFactory();
         if (StringUtils.isEmpty(accountId)) {
             hbiTexTradFactory.addHeaders(Headers.of("uid", uid));
         } else {
@@ -334,38 +371,41 @@ public class TradiTexConnectorRestful implements ITradiTexConnectorRMi {
     }
 
     // ### HBiTexTrade account subscribe 订阅账户资产变动
-    @RequestMapping(value = "/hbitex/account/sub", method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public R<Boolean> hbitexAccountSubscribe(@RequestParam("connid") String connid) {
+    @RequestMapping(value = "/hbitex/account/sub", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public R<Boolean> hbitexAccountSubscribe(
+    		@RequestHeader("connid") String connid
+	) {
         restValidator.connIdValid(connid);
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdFun(connid, conn).connIdIllegalHbiTex(connid);
-        HBiTexTradFactory hbiTexTradFactory = (HBiTexTradFactory) conn.getFactory();
+        HBiTexAccountBalanceFactory hbiTexTradFactory = (HBiTexAccountBalanceFactory) conn.getFactory();
         hbiTexTradFactory.subAccount();
         return R.ok(true);
     }
 
     // ### HBiTexTrade order subscribe 订阅订单更新, 相比现有用户订单更新推送主题“orders.$symbol”，
     // 新增主题“orders.$symbol.update”拥有更低的数据延迟以及更准确的消息顺序
-    @RequestMapping(value = "/hbitex/order/sub", method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public R<Boolean> hbitexOrderSubscribe(@RequestParam("connid") String connid,
-            @RequestParam("symbol") String symbol) {
+    @RequestMapping(value = "/hbitex/order/sub", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public R<Boolean> hbitexOrderSubscribe(
+    		@RequestHeader("connid") String connid,
+            @RequestParam("symbol") String symbol
+    ) {
         Assertions.assertThat(symbol).withFailMessage("%s 必传", "uid").isNotBlank();
         restValidator.connIdValid(connid);
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdFun(connid, conn).connIdIllegalHbiTex(connid);
-        HBiTexTradFactory hbiTexTradFactory = (HBiTexTradFactory) conn.getFactory();
+        HBiTexAccountBalanceFactory hbiTexTradFactory = (HBiTexAccountBalanceFactory) conn.getFactory();
         hbiTexTradFactory.subOrderStat(symbol);
         return R.ok(true);
     }
 
     // ### oanda 外汇
     // 连接 oanda 汇率 stream, 返回新建立的 stream 的唯一ID
-    @RequestMapping(value = "/oanda/pricing/stream-setup", method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public R<String> oandaPricingStreamSetup(@RequestParam("stream-host") String streamHost,
-            @RequestParam("connid") String connid, @RequestParam("account-id") String accountId,
+    @RequestMapping(value = "/oanda/pricing/stream-setup", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public R<String> oandaPricingStreamSetup(
+    		@RequestParam("stream-host") String streamHost,
+            @RequestParam("connid") String connid, 
+            @RequestParam("account-id") String accountId,
             @RequestParam("access-token") String accessToken,
             @RequestParam("instruments") String[] instruments,
             @RequestParam(value = "proxy-address", required = false) String proxyAddress,
@@ -376,8 +416,7 @@ public class TradiTexConnectorRestful implements ITradiTexConnectorRMi {
         Assertions.assertThat(accessToken).withFailMessage("%s 必传", "access-token").isNotBlank();
         Assertions.assertThat(instruments).withFailMessage("%s 必传", "instruments").isNotEmpty();
         restValidator.connIdValid(connid);
-        InetSocketAddress proxy =
-                proxyAddress == null ? null : new InetSocketAddress(proxyAddress, proxyPost);
+        InetSocketAddress proxy = proxyAddress == null ? null : new InetSocketAddress(proxyAddress, proxyPost);
         ITridexTradFactory factory = connectionComponent.factory(connid);
         if (factory != null) {
             return new R<>(R.FUN, connid, "OK");

@@ -29,9 +29,8 @@ public class CombineMessage implements CombineMessageListener {
     
     @Override
     public void onConnected(String vender, String connid, JSONObject message) {
+        connectionComponent.putEvent(connid, "connected", Instant.now().toEpochMilli());
         kafkaProducer.connectedBroadcase(message);
-        TradiTexConnection<?> connection = connectionComponent.get(connid);
-        tradiTexRedis.writeConnection(connid, connection.getFactory());
     }
     
     @Override
@@ -42,33 +41,24 @@ public class CombineMessage implements CombineMessageListener {
 
     @Override
     public void onAuthMessage(String vender, String connid, JSONObject message, Long receiveTime) {
+    	connectionComponent.putEvent(connid, "authed", receiveTime);
         logger.info("onAuthMessage, 鉴权: vender={}, connid={}, message={}", vender, connid, message);
         kafkaProducer.authEventBroadcase(message);
-        TradiTexConnection<?> connection = connectionComponent.get(connid);
-        tradiTexRedis.writeConnection(connid, connection.getFactory());
     }
 
     @Override
     public void onFailed(String vender, String connid, JSONObject message, Long eventTime) {
-        TradiTexConnection<?> connection = connectionComponent.get(connid);
-        if (connection == null) {
-            return;
-        }
-        tradiTexRedis.writeConnection(connid, connection.getFactory());
-        logger.info("onFailed, 连接失败, {} 秒后自动重连: vender={}, status={}, message={}",
-                HBiTexRetryer.RECONNECT_TIME_SEC, vender, connection.getFactory().status(), message);
-        retryerComponent.add(connection); // 重新连接
+    	TradiTexConnection<?> connection = connectionComponent.putEvent(connid, "failed", eventTime);
+    	if (connection != null) {
+            logger.info("onFailed, 连接失败, {} 秒后自动重连: vender={}, status={}, message={}", HBiTexRetryer.RECONNECT_TIME_SEC, vender, connection.getFactory().status(), message);
+            retryerComponent.add(connection); // 重新连接
+    	}
     }
 
     @Override
-    public void onTimeout(String vender, String connid, JSONObject message, Long eventTime,
-            Long start, Long end) {
+    public void onTimeout(String vender, String connid, JSONObject message, Long eventTime, Long start, Long end) {
+    	connectionComponent.putEvent(connid, "timeout", eventTime);
         logger.info("onTimeout, 连接超时: vender={}, connid={}, message={}", vender, connid, message);
-        TradiTexConnection<?> connection = connectionComponent.get(connid);
-        if (connection == null) {
-            return;
-        }
-        tradiTexRedis.writeConnection(connid, connection.getFactory());
     }
 
     @Override
@@ -102,15 +92,13 @@ public class CombineMessage implements CombineMessageListener {
     }
 
     @Override
-    public void onAccountMessage(String vender, String connid, JSONObject message,
-            Long receiveTime) {
+    public void onAccountMessage(String vender, String connid, JSONObject message, Long receiveTime) {
         kafkaProducer.balanceBroadcase(message);
         connectionComponent.putEvent(connid, "account-changed", receiveTime);
     }
 
     @Override
-    public void onOrderStatMessage(String vender, String connid, JSONObject message,
-            Long receiveTime) {
+    public void onOrderStatMessage(String vender, String connid, JSONObject message, Long receiveTime) {
         kafkaProducer.orderStateBroadcase(message);
     }
 

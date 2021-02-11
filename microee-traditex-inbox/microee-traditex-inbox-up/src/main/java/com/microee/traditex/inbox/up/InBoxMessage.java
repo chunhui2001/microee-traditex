@@ -10,15 +10,15 @@ import com.microee.traditex.inbox.oem.constrants.VENDER;
 //timeD 广播时间
 public class InBoxMessage {
 
-    public static final String SHUTDOWN = "shutdown";
-    public static final String ERROR = "error";
+    public static final String SHUTDOWN = "shutdown"; // 连接主动关闭，已断开
+    public static final String ERROR = "error"; // 
     public static final String QUOTE = "quote"; // 报价等同于 orderbook
     public static final String CONNECTED = "connected"; // 连接成功打开
-    public static final String DISCONNECTED = "disconnected"; // 连接已断开
+    public static final String DISCONNECTED = "disconnected"; // 连接被动关闭, 已断开
     public static final String TIMEOUT = "timeout"; // 连接超时
     public static final String PRICE_STREAM = "pricing-stream";
     public static final String PING = "ping";
-    public static final String FAILED = "failed";
+    public static final String FAILED = "failed"; // 连接失败, 已断开
     public static final String SUBBED = "subbed";
     public static final String UNSUB = "unsub";
     public static final String UNSUBBED = "unsubbed";

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.assertj.core.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.microee.plugin.response.R;
 import com.microee.traditex.inbox.app.components.TradiTexConnectComponent;
 import com.microee.traditex.inbox.app.components.TradiTexRedis;
@@ -20,7 +22,8 @@ import com.microee.traditex.inbox.oem.connector.TradiTexConnection;
 import com.microee.traditex.inbox.oem.hbitex.HBiTexHttpResult;
 import com.microee.traditex.inbox.oem.hbitex.vo.AccountBalance;
 import com.microee.traditex.inbox.oem.hbitex.vo.AccountBalanceList;
-import com.microee.traditex.inbox.up.hbitex.HBiTexTradFactory;
+import com.microee.traditex.inbox.up.hbitex.factory.HBiTexFactory;
+
 import okhttp3.Headers;
 
 // HBiTex 账户相关
@@ -48,8 +51,7 @@ public class TradiTexHBiTexAccountRestful implements ITradiTexHBiTexAccountRMi {
         restValidator.connIdValid(connid);
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdFun(connid, conn).connIdIllegalHbiTex(connid);
-        HBiTexTradFactory hbiTexTradFactory =
-                connectionComponent.get(connid, HBiTexTradFactory.class);
+        HBiTexFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexFactory.class);
         HBiTexHttpResult<List<Map<String, Object>>> hbiTexResult =
                 hbiTexTradFactory.queryAccounts(resthost);
         if (hbiTexResult == null) {
@@ -90,8 +92,7 @@ public class TradiTexHBiTexAccountRestful implements ITradiTexHBiTexAccountRMi {
         restValidator.connIdValid(connid);
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdFun(connid, conn).connIdIllegalHbiTex(connid);
-        HBiTexTradFactory hbiTexTradFactory =
-                connectionComponent.get(connid, HBiTexTradFactory.class);
+        HBiTexFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexFactory.class);
         HBiTexHttpResult<AccountBalance> hbiTexResult =
                 hbiTexTradFactory.querySpotAccountBalance(resthost);
         if (!hbiTexResult.isSuccess()) {

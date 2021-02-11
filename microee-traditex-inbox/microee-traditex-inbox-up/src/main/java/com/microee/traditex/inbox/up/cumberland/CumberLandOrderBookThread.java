@@ -2,13 +2,13 @@ package com.microee.traditex.inbox.up.cumberland;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.microee.traditex.inbox.up.hbitex.HBiTexOrderBookThread;
 
 public class CumberLandOrderBookThread implements Runnable, UncaughtExceptionHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(HBiTexOrderBookThread.class);
+    private static final Logger logger = LoggerFactory.getLogger(CumberLandOrderBookThread.class);
     
     private static final String THREAD_NAME = "cumberland-orderbook-thread-";
     private final CumberLandFactory factory;

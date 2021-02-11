@@ -3,13 +3,14 @@ package com.microee.traditex.inbox.app.validator;
 import org.assertj.core.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import com.microee.traditex.inbox.app.components.TradiTexConnectComponent;
 import com.microee.traditex.inbox.oem.connector.ITridexTradFactory;
 import com.microee.traditex.inbox.oem.connector.TradiTexConnection;
 import com.microee.traditex.inbox.oem.constrants.ConnectStatus;
 import com.microee.traditex.inbox.up.b2c2.B2C2Factory;
 import com.microee.traditex.inbox.up.cumberland.CumberLandFactory;
-import com.microee.traditex.inbox.up.hbitex.HBiTexTradFactory;
+import com.microee.traditex.inbox.up.hbitex.factory.HBiTexFactory;
 import com.microee.traditex.inbox.up.jumptrading.JumpTradingFactory;
 import com.microee.traditex.inbox.up.oanda.OandaTradFactory;
 
@@ -31,7 +32,7 @@ public class RestValidator {
     }
     
     public RestValidator connIdIllegalHbiTex(String connid) {
-        Assertions.assertThat(connectionComponent.get(connid).getFactory() instanceof HBiTexTradFactory).withFailMessage("%s 不匹配", connid).isTrue();
+        Assertions.assertThat(connectionComponent.get(connid).getFactory() instanceof HBiTexFactory).withFailMessage("%s 不匹配", connid).isTrue();
         return this;
     }
     

@@ -1,30 +1,32 @@
-package com.microee.traditex.inbox.up.hbitex;
+package com.microee.traditex.inbox.up.hbitex.factory;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HBiTexOrderBookThread implements Runnable, UncaughtExceptionHandler {
+public class HBiTexThreader implements Runnable, UncaughtExceptionHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(HBiTexOrderBookThread.class);
+    private static final Logger logger = LoggerFactory.getLogger(HBiTexThreader.class);
     
-    private static final String THREAD_NAME = "hbitex-orderbook-thread-";
-    private final HBiTexTradFactory factory;
+    private final String THREAD_NAME;
+    private final HBiTexFactory factory;
     private AtomicInteger threadId = new AtomicInteger(0);
     private Thread currentThread;
     
-    public static HBiTexOrderBookThread create(HBiTexTradFactory factory) {
-        return new HBiTexOrderBookThread(factory);
+    public static HBiTexThreader create(HBiTexFactory factory, String threadName) {
+        return new HBiTexThreader(factory, threadName);
     }
     
-    public HBiTexOrderBookThread(HBiTexTradFactory factory) {
+    public HBiTexThreader(HBiTexFactory factory, String threadName) {
         this.factory = factory;
+        this.THREAD_NAME = threadName;
     }
     
     @Override
     public void run() {
-        this.factory.createWebSocketForOrderbook();
+        this.factory.createWebSocket();
     }
     
     public Thread thread() {
@@ -39,8 +41,7 @@ public class HBiTexOrderBookThread implements Runnable, UncaughtExceptionHandler
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        logger.info("异步线程异常: factory={}, threadId={}, threadName={}, errorMessage={}", 
-                this.factory.config(), t.getId(), t.getName(), e.getMessage(), e);
+        logger.info("异步线程异常: factory={}, threadId={}, threadName={}, errorMessage={}",  this.factory.config(), t.getId(), t.getName(), e.getMessage(), e);
         this.start();
     }
 

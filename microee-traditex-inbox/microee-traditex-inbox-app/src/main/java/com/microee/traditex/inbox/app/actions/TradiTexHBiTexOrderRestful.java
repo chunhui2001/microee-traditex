@@ -3,6 +3,7 @@ package com.microee.traditex.inbox.app.actions;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.assertj.core.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.microee.plugin.response.R;
 import com.microee.plugin.response.exception.RestException;
 import com.microee.traditex.inbox.app.components.TradiTexConnectComponent;
@@ -21,9 +23,9 @@ import com.microee.traditex.inbox.oem.hbitex.po.BigDecimalValue;
 import com.microee.traditex.inbox.oem.hbitex.po.HBiTexOrderPlaceParam;
 import com.microee.traditex.inbox.oem.hbitex.vo.HBiTexOrderDetails;
 import com.microee.traditex.inbox.oem.hbitex.vo.OrderMatchresults;
-import com.microee.traditex.inbox.up.hbitex.HBiTexTradFactory;
+import com.microee.traditex.inbox.up.hbitex.factory.HBiTexFactory;
 
-//HBiTex 订单相关
+// HBiTex 订单相关
 @RestController
 @RequestMapping("/traditex-hbitex-order")
 public class TradiTexHBiTexOrderRestful implements ITradiTexHBiTexOrderRMi {
@@ -45,11 +47,8 @@ public class TradiTexHBiTexOrderRestful implements ITradiTexHBiTexOrderRMi {
         restValidator.connIdValid(connid);
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdFun(connid, conn).connIdIllegalHbiTex(connid);
-        HBiTexTradFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexTradFactory.class);
+        HBiTexFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexFactory.class);
         HBiTexHttpResult<List<Map<String, Object>>> hbiTexResult = hbiTexTradFactory.querySymbols(resthost);
-        if (hbiTexResult == null) {
-            return R.failed(R.TIME_OUT, "超时");
-        }
         if (!hbiTexResult.isSuccess()) {
             return R.failed(hbiTexResult.getErrCode() + "`" + hbiTexResult.getErrMsg() + "`");
         }
@@ -71,7 +70,7 @@ public class TradiTexHBiTexOrderRestful implements ITradiTexHBiTexOrderRMi {
         restValidator.connIdValid(connid);
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdFun(connid, conn).connIdIllegalHbiTex(connid);
-        HBiTexTradFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexTradFactory.class);
+        HBiTexFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexFactory.class);
         HBiTexHttpResult<List<Map<String, Object>>> hbiTexResult = hbiTexTradFactory.querySymbols(resthost);
         if (hbiTexResult == null) {
             return R.failed(R.TIME_OUT, "超时");
@@ -113,7 +112,7 @@ public class TradiTexHBiTexOrderRestful implements ITradiTexHBiTexOrderRMi {
         restValidator.connIdValid(connid);
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdFun(connid, conn).connIdIllegalHbiTex(connid);
-        HBiTexTradFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexTradFactory.class);
+        HBiTexFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexFactory.class);
         HBiTexHttpResult<String>  result = hbiTexTradFactory.createOrder(resthost, new HBiTexOrderPlaceParam(symbol, side, amountDecimal.value, priceDecimal == null ? null : priceDecimal.value, clientOrderId, orderType));
         if (result == null) {
             throw new RestException(R.TIME_OUT, "超时");
@@ -135,7 +134,7 @@ public class TradiTexHBiTexOrderRestful implements ITradiTexHBiTexOrderRMi {
         restValidator.connIdValid(connid);
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdFun(connid, conn).connIdIllegalHbiTex(connid);
-        HBiTexTradFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexTradFactory.class);
+        HBiTexFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexFactory.class);
         HBiTexHttpResult<HBiTexOrderDetails> hbiTexResult = hbiTexTradFactory.queryOrderDetail(resthost, orderId);
         if (hbiTexResult == null) {
             return R.failed(R.TIME_OUT, "超时");
@@ -161,7 +160,7 @@ public class TradiTexHBiTexOrderRestful implements ITradiTexHBiTexOrderRMi {
         restValidator.connIdValid(connid);
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdFun(connid, conn).connIdIllegalHbiTex(connid);
-        HBiTexTradFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexTradFactory.class);
+        HBiTexFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexFactory.class);
         HBiTexHttpResult<List<HBiTexOrderDetails>> hbiTexResult = hbiTexTradFactory.queryOrders(resthost, symbol, stats);
         if (hbiTexResult == null) {
             return R.failed(R.TIME_OUT, "超时");
@@ -186,7 +185,7 @@ public class TradiTexHBiTexOrderRestful implements ITradiTexHBiTexOrderRMi {
         restValidator.connIdValid(connid);
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdFun(connid, conn).connIdIllegalHbiTex(connid);
-        HBiTexTradFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexTradFactory.class);
+        HBiTexFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexFactory.class);
         HBiTexHttpResult<HBiTexOrderDetails> hbiTexResult = hbiTexTradFactory.queryOrderByClientId(resthost, clientOrderId); 
         if (hbiTexResult == null) {
             return R.failed(R.TIME_OUT, "超时");
@@ -214,7 +213,7 @@ public class TradiTexHBiTexOrderRestful implements ITradiTexHBiTexOrderRMi {
         restValidator.connIdValid(connid);
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdFun(connid, conn).connIdIllegalHbiTex(connid);
-        HBiTexTradFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexTradFactory.class);
+        HBiTexFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexFactory.class);
         HBiTexHttpResult<List<OrderMatchresults>> hbiTexResult = hbiTexTradFactory.queryOrderMatchresults(resthost, orderId);
         if (hbiTexResult == null) {
             return R.failed(R.TIME_OUT, "超时");
@@ -240,7 +239,7 @@ public class TradiTexHBiTexOrderRestful implements ITradiTexHBiTexOrderRMi {
         restValidator.connIdValid(connid);
         TradiTexConnection<?> conn = connectionComponent.get(connid);
         restValidator.connIdFun(connid, conn).connIdIllegalHbiTex(connid);
-        HBiTexTradFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexTradFactory.class);
+        HBiTexFactory hbiTexTradFactory = connectionComponent.get(connid, HBiTexFactory.class);
         if (orderId.length == 1) {
             HBiTexHttpResult<String> hbiTexResult = hbiTexTradFactory.revokeOrder(resthost, orderId[0]);
             if (hbiTexResult == null) {

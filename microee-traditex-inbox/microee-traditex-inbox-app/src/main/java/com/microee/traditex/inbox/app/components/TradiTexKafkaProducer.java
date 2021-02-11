@@ -1,6 +1,8 @@
 package com.microee.traditex.inbox.app.components;
 
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -9,6 +11,8 @@ import com.microee.stacks.kafka.support.KafkaStringProducer;
 @Component
 public class TradiTexKafkaProducer {
 
+    private static final Logger logger = LoggerFactory.getLogger(TradiTexKafkaProducer.class);
+    
     @Autowired(required=false)
     private KafkaStringProducer kafkaStringProducer;
     
@@ -43,6 +47,7 @@ public class TradiTexKafkaProducer {
      */
     public void subscribeEventBroadcase(JSONObject message) {
     	if (kafkaStringProducer == null) {
+    		logger.warn("收到消息未订阅: message={}", message.toString());
     		return;
     	}
         kafkaStringProducer.sendMessage(subscribeEventTopic, message.toString());
@@ -54,6 +59,7 @@ public class TradiTexKafkaProducer {
      */
     public void connectedBroadcase(JSONObject message) {
     	if (kafkaStringProducer == null) {
+    		logger.warn("收到消息未订阅: message={}", message.toString());
     		return;
     	}
         kafkaStringProducer.sendMessage(connectedTopic, message.toString());
@@ -65,6 +71,7 @@ public class TradiTexKafkaProducer {
      */
     public void pricingBroadcase(JSONObject message) {
     	if (kafkaStringProducer == null) {
+    		logger.warn("收到消息未订阅: message={}", message.toString());
     		return;
     	}
         kafkaStringProducer.sendMessage(pricingTopic, message.toString());
@@ -77,6 +84,7 @@ public class TradiTexKafkaProducer {
      */
     public void orderBookBroadcase(JSONObject message) {
     	if (kafkaStringProducer == null) {
+    		logger.warn("收到消息未订阅: message={}", message.toString());
     		return;
     	}
         kafkaStringProducer.sendMessage(orderBookTopic, message.toString());
@@ -89,6 +97,7 @@ public class TradiTexKafkaProducer {
      */
     public void balanceBroadcase(JSONObject message) {
     	if (kafkaStringProducer == null) {
+    		logger.warn("收到消息未订阅: message={}", message.toString());
     		return;
     	}
         kafkaStringProducer.sendMessage(banalceTopic, message.toString());
@@ -101,6 +110,7 @@ public class TradiTexKafkaProducer {
      */
     public void orderStateBroadcase(JSONObject message) {
     	if (kafkaStringProducer == null) {
+    		logger.warn("收到消息未订阅: message={}", message.toString());
     		return;
     	}
         kafkaStringProducer.sendMessage(orderStatTopic, message.toString());
@@ -109,6 +119,7 @@ public class TradiTexKafkaProducer {
     // 广播鉴权事件
     public void authEventBroadcase(JSONObject message) {
     	if (kafkaStringProducer == null) {
+    		logger.warn("收到消息未订阅: message={}", message.toString());
     		return;
     	}
         kafkaStringProducer.sendMessage(authEventTopic, message.toString());
@@ -117,6 +128,7 @@ public class TradiTexKafkaProducer {
     // 广播连接关闭事件
     public void shutdownBroadcase(JSONObject message) {
     	if (kafkaStringProducer == null) {
+    		logger.warn("收到消息未订阅: message={}", message.toString());
     		return;
     	}
         kafkaStringProducer.sendMessage(connectShutDownEventTopic, message.toString());

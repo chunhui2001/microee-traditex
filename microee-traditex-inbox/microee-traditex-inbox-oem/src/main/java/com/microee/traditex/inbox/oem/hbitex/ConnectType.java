@@ -7,7 +7,8 @@ public enum ConnectType {
 
     ORDER_BOOK("ORDER_BOOK", "订单薄连接"),
     ORDER_BALANCE("ORDER_BALANCE", "资产及订单连接"),
-    OANDA_PRICE("OANDA_PRICE", "汇率连接");
+    OANDA_PRICE("OANDA_PRICE", "汇率连接"),
+    KLINE("KLINE", "K线连接");
 
     private String code;
     private String desc;

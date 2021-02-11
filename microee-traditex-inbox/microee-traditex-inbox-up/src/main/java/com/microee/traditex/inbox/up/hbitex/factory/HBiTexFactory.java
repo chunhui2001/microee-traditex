@@ -1,4 +1,4 @@
-package com.microee.traditex.inbox.up.hbitex;
+package com.microee.traditex.inbox.up.hbitex.factory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
@@ -20,17 +20,19 @@ import java.util.Map.Entry;
 import java.util.StringJoiner;
 import java.util.TreeMap;
 import java.util.UUID;
+
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableList;
 import com.microee.plugin.http.assets.HttpAssets;
 import com.microee.plugin.http.assets.HttpClient;
-import com.microee.plugin.http.assets.HttpClientLogger;
 import com.microee.plugin.http.assets.HttpClientResult;
 import com.microee.plugin.http.assets.HttpWebsocketListener;
 import com.microee.plugin.response.R;
@@ -38,7 +40,6 @@ import com.microee.plugin.response.exception.RestException;
 import com.microee.traditex.inbox.oem.connector.ITridexTradFactory;
 import com.microee.traditex.inbox.oem.constrants.ConnectStatus;
 import com.microee.traditex.inbox.oem.hbitex.ApiSignature;
-import com.microee.traditex.inbox.oem.hbitex.ConnectType;
 import com.microee.traditex.inbox.oem.hbitex.HBiTexAccount;
 import com.microee.traditex.inbox.oem.hbitex.HBiTexHttpResult;
 import com.microee.traditex.inbox.oem.hbitex.po.HBiTexOrderPlaceParam;
@@ -47,44 +48,33 @@ import com.microee.traditex.inbox.oem.hbitex.vo.HBiTexOrderDetails;
 import com.microee.traditex.inbox.oem.hbitex.vo.OrderMatchresults;
 import com.microee.traditex.inbox.up.CombineMessageListener;
 import com.microee.traditex.inbox.up.TradiTexAssists;
+import com.microee.traditex.inbox.up.hbitex.factory.wshandler.HBiTexWebsocketHandler;
+
 import okhttp3.Headers;
 
-public class HBiTexTradFactory implements ITridexTradFactory {
+public abstract class HBiTexFactory implements ITridexTradFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HBiTexTradFactory.class); 
+    private static final Logger LOGGER = LoggerFactory.getLogger(HBiTexFactory.class); 
     
-    private final String uid;
-    private final String connid;
-    private final String wshost;
-    private Headers headers;
-    private final JSONObject auth;
-    private final ConnectType connectType;
-    private final HttpClient httpClient;
-    private final HttpClient wsHttpClient;
-    private final HBiTexOrderBookWebsocketHandler wsOrderBookHandler;
-    private final HBiTexOrderBalanceWebsocketHandler wsOrderBalanceHandler;
-    private final HBiTexOrderBookThread orderBookThread;
-    private final HBiTexOrderBalanceThread orderBalanceThread;
-    private final List<String> topics;
-    private Long lastTime;
-    private String lastEvent;
-    private Long lastPing; // 最后一次续约时间
-    private Long lease; // 租约有效期, 超过这个时间将被销毁
-
-    public HBiTexTradFactory(String connid, String wshost, String exchangeCode, ConnectType connectType, 
-            CombineMessageListener combineMessageListener, InetSocketAddress proxy, HttpClientLogger log) {
-        this.uid = null;
-        this.connid = connid;
-        this.wshost = wshost;
-        this.headers = Headers.of("connid", connid, "cloud-exchange", exchangeCode);
+    protected final HBiTexFactoryConf conf;
+    protected final JSONObject auth;
+    protected final HttpClient httpClient;
+    protected final HttpClient wsHttpClient;
+    protected final CombineMessageListener combineMessageListener;
+    protected final HBiTexThreader theader;
+    protected final List<String> topics;
+    protected Long lastTime;
+    protected String lastEvent;
+    protected Long lastPing; // 最后一次续约时间
+    protected Long lease; // 租约有效期, 超过这个时间将被销毁
+    
+    public HBiTexFactory(HBiTexFactoryConf conf, CombineMessageListener combineMessageListener, InetSocketAddress proxy) {
+        this.conf = conf;
         this.auth = new JSONObject();
-        this.connectType = connectType;
-        this.wsHttpClient = HttpClient.create(null, proxy);
-        this.httpClient = HttpClient.create(null, proxy).setListener(log);
-        this.wsOrderBookHandler = new HBiTexOrderBookWebsocketHandler(this.connid, combineMessageListener);
-        this.wsOrderBalanceHandler = new HBiTexOrderBalanceWebsocketHandler(this.connid, combineMessageListener);
-        this.orderBookThread = new HBiTexOrderBookThread(this);
-        this.orderBalanceThread = new HBiTexOrderBalanceThread(this);
+        this.wsHttpClient = HttpClient.create(null, proxy, "OKHTTP-WEBSOCKET");
+        this.httpClient = HttpClient.create(null, proxy, "OKHTTP-CLIENT").setListener(this.conf.logger);
+        this.combineMessageListener = combineMessageListener;
+        this.theader = new HBiTexThreader(this, this.conf.threadName);
         this.topics = new ArrayList<>();
         this.lastEvent = null;
         this.lastTime = null;
@@ -92,27 +82,23 @@ public class HBiTexTradFactory implements ITridexTradFactory {
         this.lease = null;
     }
     
-    public HBiTexTradFactory(String connid, String uid, String wshost, String exchangeCode, ConnectType connectType, 
-            CombineMessageListener combineMessageListener, InetSocketAddress proxy, HttpClientLogger log) {
-        this.uid = uid;
-        this.connid = connid;
-        this.wshost = wshost;
-        this.headers = Headers.of("connid", connid, "cloud-exchange", exchangeCode, "uid", uid);
-        this.auth = new JSONObject();
-        this.connectType = connectType;
-        this.wsHttpClient = HttpClient.create(null, proxy);
-        this.httpClient = HttpClient.create(null, proxy).setListener(log);
-        this.wsOrderBookHandler = new HBiTexOrderBookWebsocketHandler(this.connid, combineMessageListener);
-        this.wsOrderBalanceHandler = new HBiTexOrderBalanceWebsocketHandler(this.connid, combineMessageListener);
-        this.orderBookThread = new HBiTexOrderBookThread(this);
-        this.orderBalanceThread = new HBiTexOrderBalanceThread(this);
-        this.topics = new ArrayList<>();
-        this.lastEvent = null;
-        this.lastTime = null;
-        this.lastPing = null;
-        this.lease = null;
+    public Headers headers() {
+    	if (this.conf.uid != null) {
+    		return Headers.of("connid", this.conf.connid, "cloud-exchange", this.conf.exchangeCode, "uid", this.conf.uid);
+    	}
+    	return Headers.of("connid", this.conf.connid, "cloud-exchange", this.conf.exchangeCode);
     }
+    
+    // 子类重写该方法
+    public abstract String connectType();
+    public abstract HBiTexWebsocketHandler wsHandler();
+    public abstract HttpWebsocketListener wsListener();
 
+    public HBiTexFactory createWebSocket() {
+        this.wsHttpClient.websocket(this.conf.wshost, this.headers(), this.wsListener());
+        return this;
+    }
+    
     @Override
     public Object factory() {
         return this;
@@ -120,11 +106,11 @@ public class HBiTexTradFactory implements ITridexTradFactory {
 
     @Override
     public String connid() {
-        return this.connid;
+        return this.conf.connid;
     }
     
     public String uid() {
-        return this.uid;
+        return this.conf.uid;
     }
 
     @Override
@@ -146,46 +132,31 @@ public class HBiTexTradFactory implements ITridexTradFactory {
     
     @Override
     public JSONObject config() {
+    	Headers _headers = this.headers();
         JSONObject json = new JSONObject();
         json.put("vender", "HBiTex");
-        json.put("connectType", this.connectType);
-        json.put("headers", ImmutableList.copyOf(this.headers.iterator()).toString()); 
-        json.put("wshost", this.wshost);
-        json.put("status", this.status() == null ? "N/a" : this.status().name());
+        json.put("connectType", this.connectType());
+        json.put("headers", ImmutableList.copyOf(_headers.iterator()).toString()); 
+        json.put("wshost", this.conf.wshost);
+        json.put("status", this.status().name());
         json.put("topic", this.topics());
         json.put("lastEvent", this.lastEvent == null ? "N/a" : (this.lastEvent + "/" + this.lastTime));
         json.put("lastPing", this.lastPing == null ? "N/a" : (this.lastPing + "/" + this.lease));
-        if (ConnectType.ORDER_BALANCE.equals(this.connectType)) {
+        if (this.auth != null && this.auth.has("accessKey")) {
             JSONObject authjson = new JSONObject();
-            if (this.auth != null && this.auth.has("accessKey")) {
-                authjson.put("accessKey", TradiTexAssists.shorterContent(this.auth.getString("accessKey"), (short)8));
-            }
-            if (this.auth != null && this.auth.has("secretKey")) {
-                authjson.put("secretKey", TradiTexAssists.shorterContent(this.auth.getString("secretKey"), (short)8));
-            }
+            authjson.put("accessKey", TradiTexAssists.shorterContent(this.auth.getString("accessKey"), (short)8));
+            authjson.put("secretKey", TradiTexAssists.shorterContent(this.auth.getString("secretKey"), (short)8));
             json.put("auth", authjson);
-        }
-        if (ConnectType.ORDER_BOOK.equals(this.connectType)) {
-            // ..
         }
         return json;
     }
 
     @Override
     public ConnectStatus status() {
-        if (this.connectType.equals(ConnectType.ORDER_BALANCE)) {
-            if (this.wsOrderBalanceHandler == null) {
-                return ConnectStatus.UNKNOW;
-            }
-            return this.wsOrderBalanceHandler.getConnectStatus();
+    	if (this.wsHandler() == null) {
+            return ConnectStatus.UNKNOW;
         }
-        if (this.connectType.equals(ConnectType.ORDER_BOOK)) {
-            if (this.wsOrderBookHandler == null) {
-                return ConnectStatus.UNKNOW;
-            }
-            return this.wsOrderBookHandler.getConnectStatus();
-        }
-        return ConnectStatus.UNKNOW;
+        return this.wsHandler().getConnectStatus();
     }
 
     @Override
@@ -219,39 +190,24 @@ public class HBiTexTradFactory implements ITridexTradFactory {
         if (theHeaders == null) {
             return;
         }
+    	Headers _headers = this.headers();
         Map<String, String> currentHeaderMap = new HashMap<>();
-        if (this.headers != null) {
-            this.headers.forEach(a -> {
+        if (_headers != null) {
+        	_headers.forEach(a -> {
                 currentHeaderMap.put(a.getFirst(), a.getSecond());
             });
         }
         theHeaders.forEach(a -> {
             currentHeaderMap.put(a.getFirst(), a.getSecond());
         });
-        this.headers = Headers.of(currentHeaderMap);
-    }
-
-    public HBiTexTradFactory createWebSocketForOrderbook() {
-        this.wsHttpClient.websocket(wshost, this.headers, new HttpWebsocketListener(this.wsOrderBookHandler));
-        return this;
-    }
-
-    public HBiTexTradFactory createWebSocketForOrderBalance() {
-        this.wsHttpClient.websocket(wshost, this.headers, new HttpWebsocketListener(this.wsOrderBalanceHandler));
-        return this;
+        _headers = Headers.of(currentHeaderMap);
     }
 
     @Override
     public void shutdown() {
         LOGGER.info("HBiTex-关闭连接: connid={}, connectConfig={}", this.connid(), this.config());
-        if (this.connectType.equals(ConnectType.ORDER_BALANCE)) {
-            this.wsOrderBalanceHandler.closeWebsocket();
-            this.orderBalanceThread.shutdown();
-        }
-        if (this.connectType.equals(ConnectType.ORDER_BOOK)) {
-            this.wsOrderBookHandler.closeWebsocket();
-            this.orderBookThread.shutdown();
-        }
+        this.wsHandler().closeWebsocket();
+        this.theader.shutdown();
     }
     
     /**
@@ -260,34 +216,20 @@ public class HBiTexTradFactory implements ITridexTradFactory {
     @Override
     public void connect(boolean retryer) {
         if (retryer) {
-            if (this.connectType.equals(ConnectType.ORDER_BALANCE)) {
-                this.wsOrderBalanceHandler.setConnectStatus(ConnectStatus.CONNECTING);
-                LOGGER.info("HBiTex-orderbalancd-启动重连: connid={}, connectConfig={}", this.connid(), this.config());
-                this.orderBalanceThread.start();
-            }
-            if (this.connectType.equals(ConnectType.ORDER_BOOK)) {
-                this.wsOrderBookHandler.setConnectStatus(ConnectStatus.CONNECTING);
-                LOGGER.info("HBiTex-orderbook-启动重连: connid={}, connectConfig={}", this.connid(), this.config());
-                this.orderBookThread.start();
-            }
+        	this.wsHandler().setConnectStatus(ConnectStatus.CONNECTING);
+            LOGGER.info("HBiTex-WEBSOCKET-{}-启动重连: connid={}, connectConfig={}", this.conf.title, this.connid(), this.config());
+            this.theader.start();
             return;
         }
-        if (this.connectType.equals(ConnectType.ORDER_BALANCE)) {
-            this.wsOrderBalanceHandler.setConnectStatus(ConnectStatus.CONNECTING);
-            LOGGER.info("HBiTex-orderbalancd-启动重连: connid={}, connectConfig={}", this.connid(), this.config());
-            this.orderBalanceThread.start();
-        }
-        if (this.connectType.equals(ConnectType.ORDER_BOOK)) {
-            this.wsOrderBookHandler.setConnectStatus(ConnectStatus.CONNECTING);
-            LOGGER.info("HBiTex-orderbook-建立连接: connid={}, connectConfig={}", this.connid(), this.config());
-            this.orderBookThread.start();
-        }
+        this.wsHandler().setConnectStatus(ConnectStatus.CONNECTING);
+        LOGGER.info("HBiTex-WEBSOCKET-{}-建立连接: connid={}, connectConfig={}", this.conf.title, this.connid(), this.config());
+        this.theader.start();
     }
 
-    private HttpClientResult doGet(String endpoint, Map<String, Object> queryMap) {
+    protected HttpClientResult doGet(String endpoint, Map<String, Object> queryMap) {
         HttpClientResult httpClientResult = null;
         try {
-            httpClientResult = this.httpClient.doGetWithQueryParams(endpoint, this.headers, queryMap);
+            httpClientResult = this.httpClient.doGetWithQueryParams(endpoint, this.headers(), queryMap);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -300,11 +242,11 @@ public class HBiTexTradFactory implements ITridexTradFactory {
         return httpClientResult;
     }
 
-    private HttpClientResult doGet(String endpoint, Map<String, Object> queryMap, HBiTexAccount hbiTexAccount) {
-        String connector = HBiTexTradFactory.getConnector("get", endpoint, queryMap, hbiTexAccount.getAccesskey(), hbiTexAccount.getSecreckey());
+    protected HttpClientResult doGet(String endpoint, Map<String, Object> queryMap, HBiTexAccount hbiTexAccount) {
+        String connector = HBiTexFactory.getConnector("get", endpoint, queryMap, hbiTexAccount.getAccesskey(), hbiTexAccount.getSecreckey());
         HttpClientResult httpClientResult = null;
         try {
-            httpClientResult = this.httpClient.doGetWithQueryParams(connector, this.headers, null);
+            httpClientResult = this.httpClient.doGetWithQueryParams(connector, this.headers(), null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -318,10 +260,10 @@ public class HBiTexTradFactory implements ITridexTradFactory {
     }
     
     public HttpClientResult doPost(String endpoint, Object bodyParam, HBiTexAccount hbiTexAccount) {
-        String connector = HBiTexTradFactory.getConnector("post", endpoint, null, hbiTexAccount.getAccesskey(), hbiTexAccount.getSecreckey());
+        String connector = HBiTexFactory.getConnector("post", endpoint, null, hbiTexAccount.getAccesskey(), hbiTexAccount.getSecreckey());
         HttpClientResult httpClientResult = null;
         try {
-            httpClientResult = this.httpClient.postJsonBody(connector, this.headers, this.httpClient.getJsonString(bodyParam));
+            httpClientResult = this.httpClient.postJsonBody(connector, this.headers(), this.httpClient.getJsonString(bodyParam));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -335,7 +277,7 @@ public class HBiTexTradFactory implements ITridexTradFactory {
     }
     
     public static HttpClientResult doPostParam(HttpClient httpClient, Headers headers, String endpoint, Object bodyParam, HBiTexAccount hbiTexAccount) {
-        String connector = HBiTexTradFactory.getConnector("post", endpoint, null, hbiTexAccount.getAccesskey(), hbiTexAccount.getSecreckey());
+        String connector = HBiTexFactory.getConnector("post", endpoint, null, hbiTexAccount.getAccesskey(), hbiTexAccount.getSecreckey());
         HttpClientResult httpClientResult = null;
         try {
             httpClientResult = httpClient.postJsonBody(connector, headers, HttpAssets.toJsonString(bodyParam));
@@ -422,10 +364,11 @@ public class HBiTexTradFactory implements ITridexTradFactory {
         if (this.auth == null || !this.auth.has("secretKey")) {
             throw new IllegalStateException("未进行认证");
         }
+    	Headers _headers = this.headers();
         String secretKey = this.auth.getString("secretKey");
         String accessKey = this.auth.getString("accessKey");
-        String exchangeCode = this.headers.get("cloud-exchange");
-        String accountId = this.headers.get("accountId");
+        String exchangeCode = _headers.get("cloud-exchange");
+        String accountId = _headers.get("accountId");
         return new HBiTexAccount(accountId, accessKey, secretKey, exchangeCode);
     }
     
@@ -436,7 +379,7 @@ public class HBiTexTradFactory implements ITridexTradFactory {
         Map<String, String> map = new HashMap<>();
         ApiSignature as = new ApiSignature();
         try {
-            URI uri = new URI(this.wshost);
+            URI uri = new URI(this.conf.wshost);
             int port = uri.getPort();
             String theHost;
             if (port != -1) {
@@ -450,7 +393,7 @@ public class HBiTexTradFactory implements ITridexTradFactory {
         }
         map.put(ApiSignature.op, ApiSignature.opValue);
         map.put("cid", System.currentTimeMillis() + "");
-        this.wsOrderBalanceHandler.writeMessage(HttpAssets.toJsonString(map));
+        this.wsHandler().writeMessage(HttpAssets.toJsonString(map));
     }
     
     /**
@@ -466,7 +409,7 @@ public class HBiTexTradFactory implements ITridexTradFactory {
             //@formatter:off
             String message = String.format("{\"id\":\"%s\",\"sub\":\"market.%s.depth.step0\",\"pick\":[\"asks.30\",\"bids.30\"]}", UUID.randomUUID().toString(), ticker);
             //@formatter:on
-            this.wsOrderBookHandler.writeMessage(message);
+            this.wsHandler().writeMessage(message);
         }
     }
     
@@ -483,7 +426,7 @@ public class HBiTexTradFactory implements ITridexTradFactory {
             JSONObject json = new JSONObject();
             json.put("unsub", String.format("market.%s.depth.%s", ticker, step));
             json.put("id", UUID.randomUUID().toString());
-            this.wsOrderBookHandler.writeMessage(json.toString());
+            this.wsHandler().writeMessage(json.toString());
         }
     }
 
@@ -496,7 +439,7 @@ public class HBiTexTradFactory implements ITridexTradFactory {
         json.put("op", "unsub");
         json.put("topic", topic);
         json.put("cid", UUID.randomUUID().toString());
-        this.wsOrderBalanceHandler.writeMessage(json.toString());
+        this.wsHandler().writeMessage(json.toString());
     }
     
     /**
@@ -514,20 +457,8 @@ public class HBiTexTradFactory implements ITridexTradFactory {
                 pickExp = String.format(",\"pick\":[\"asks.%s\",\"bids.%s\"]", pick, pick);
             }
             String message = String.format("{\"id\":\"%s\",\"sub\":\"market.%s.depth.%s\"%s}", UUID.randomUUID().toString(), ticker, step, pickExp);
-            this.wsOrderBookHandler.writeMessage(message);
+            this.wsHandler().writeMessage(message);
         }
-    }
-
-    public HBiTexOrderBookWebsocketHandler getWsOrderBookHandler() {
-        return wsOrderBookHandler;
-    }
-
-    public HBiTexOrderBalanceWebsocketHandler getWsOrderBalanceHandler() {
-        return wsOrderBalanceHandler;
-    }
-
-    public ConnectType getConnectType() {
-        return connectType;
     }
 
     /**
@@ -623,7 +554,7 @@ public class HBiTexTradFactory implements ITridexTradFactory {
     public void subOrderStat(String symbol) {
         String payload = String.format("{\"op\": \"sub\",\"cid\": \"%s\",\"topic\": \"orders.%s.update\"}", UUID.randomUUID().toString(), symbol);
         LOGGER.info("订阅订单状态变化: symbol={}, payload={}", symbol, payload);
-        this.wsOrderBalanceHandler.writeMessage(payload);
+        this.wsHandler().writeMessage(payload);
     }
     
     /**
@@ -672,7 +603,7 @@ public class HBiTexTradFactory implements ITridexTradFactory {
     // 订阅账户资产变动
     public void subAccount() {
         String payload = String.format("{\"op\": \"sub\",\"cid\": \"%s\",\"topic\": \"accounts\",\"model\": \"0\"}", UUID.randomUUID().toString());
-        this.wsOrderBalanceHandler.writeMessage(payload);
+        this.wsHandler().writeMessage(payload);
     }
 
     /**

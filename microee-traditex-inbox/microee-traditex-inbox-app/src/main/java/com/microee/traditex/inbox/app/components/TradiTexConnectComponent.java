@@ -50,12 +50,14 @@ public class TradiTexConnectComponent {
         return val;
     }
 
-    public void putEvent(String connid, String event, Long timestamp) {
+    public TradiTexConnection<?> putEvent(String connid, String event, Long timestamp) {
         if (!connections.containsKey(connid)) {
-            return;
+            return null;
         }
-        ITridexTradFactory factory = this.get(connid).getFactory().putLastEvent(event).putLastTime(timestamp);
+        TradiTexConnection<?> connection = this.get(connid);
+        ITridexTradFactory factory = connection.getFactory().putLastEvent(event).putLastTime(timestamp);
         tradiTexRedis.writeConnection(connid, factory);
+        return connection;
     }
 
     public TradiTexConnection<?> get(String connid) {

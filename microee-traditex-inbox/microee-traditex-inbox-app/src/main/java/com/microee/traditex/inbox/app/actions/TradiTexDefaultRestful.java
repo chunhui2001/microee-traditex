@@ -18,7 +18,7 @@ public class TradiTexDefaultRestful {
     
     @PostConstruct
     public void init() {
-        this.httpClient = HttpClient.create(null, null);
+        this.httpClient = HttpClient.create();
     }
 
      // Use 3rd party web-sites to get your IP

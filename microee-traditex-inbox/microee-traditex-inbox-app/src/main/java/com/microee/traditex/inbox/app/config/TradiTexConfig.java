@@ -1,5 +1,7 @@
 package com.microee.traditex.inbox.app.config;
 
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import com.microee.plugin.commons.LongGenerator;
+import com.microee.plugin.http.assets.HttpAssets;
 import com.microee.traditex.inbox.app.components.TradiTexConnectComponent;
 
 @Configuration
@@ -54,9 +57,12 @@ public class TradiTexConfig implements SchedulingConfigurer, ApplicationListener
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof ApplicationReadyEvent) {
             LOGGER.info("应用程序[{}]启动成功,端口={}", applicationName, serverPort);
+        	Set<String> connidSet = connectionComponent.shutdown(new String[] {});
+        	if (connidSet.size() > 0) {
+                LOGGER.info("关闭或重建所有连接: connids={}", HttpAssets.toJsonString(connidSet));
+        	}
         }
         if (event instanceof ContextClosedEvent) {
-            connectionComponent.shutdown(new String[] {});
             LOGGER.info("应用程序[{}]已安全退出, evnent={}", applicationName, event.getClass().getName());
         }
     }
