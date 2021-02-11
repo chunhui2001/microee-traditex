@@ -2,6 +2,8 @@ package com.microee.traditex.inbox.up;
 
 import org.json.JSONObject;
 
+import com.microee.traditex.inbox.up.InBoxMessage.Message;
+
 /**
  * 消息监听
  * @author keesh
@@ -14,14 +16,14 @@ public interface CombineMessageListener {
      * @param vender
      * @param memo
      */
-    public void onConnected(String vender, String connid, JSONObject message);
+    public void onConnected(String vender, String connid, Message message);
 
     /**
      * 连接已断开
      * @param vender
      * @param memo
      */
-    public void onDisconnected(String vender, String connid, JSONObject message, Long receiveTime);
+    public void onDisconnected(String vender, String connid, Message message, Long receiveTime);
     
     /**
      * 收到远程服务器ping
@@ -30,14 +32,14 @@ public interface CombineMessageListener {
      * @param jsonObject
      * @param receiveTime
      */
-    public void onPingMessage(String vender, String connid, JSONObject message, Long receiveTime);
+    public void onPingMessage(String vender, String connid, Message message, Long receiveTime);
     
     /**
      * 收到盘口深度推送
      * @param vender
      * @param message
      */
-    public void onOrderBookMessage(String vender, String connid, JSONObject message, Long time0);
+    public void onOrderBookMessage(String vender, String connid, Message message, Long time0);
     
     /**
      * 连接失败
@@ -46,7 +48,7 @@ public interface CombineMessageListener {
      * @param message
      * @param eventTime 发生时间
      */
-    public void onFailed(String vender, String connid, JSONObject message, Long eventTime);
+    public void onFailed(String vender, String connid, Message message, Long eventTime);
 
     /**
      * 连接超时
@@ -57,14 +59,14 @@ public interface CombineMessageListener {
      * @param start 开始时间
      * @param start 结束时间
      */
-    public void onTimeout(String vender, String connid, JSONObject message, Long eventTime, Long start, Long end);
+    public void onTimeout(String vender, String connid, Message message, Long eventTime, Long start, Long end);
 
     /**
      * 订阅成功
      * @param vender
      * @param string
      */
-    public void onSubbedMessage(String vender, String connid, JSONObject message, String topic, Long receiveTime);
+    public void onSubbedMessage(String vender, String connid, Message message, String topic, Long receiveTime);
     
     /**
      * 取消订阅成功
@@ -73,14 +75,14 @@ public interface CombineMessageListener {
      * @param message
      * @param topic
      */
-    public void onUnSubbedMessage(String vender, String connid, JSONObject message, String topic);
+    public void onUnSubbedMessage(String vender, String connid, Message message, String topic);
 
     /**
      * 错误消息推送
      * @param vender
      * @param string
      */
-    public void onErrorMessage(String vender, String connid, JSONObject message, Long receiveTime);
+    public void onErrorMessage(String vender, String connid, Message message, Long receiveTime);
 
     /**
      * 账户信息推送
@@ -89,15 +91,18 @@ public interface CombineMessageListener {
      * @param message
      * @param receiveTime
      */
-    public void onAccountMessage(String vender, String connid, JSONObject message, Long receiveTime);
+    public void onAccountMessage(String vender, String connid, Message message, Long receiveTime);
 
     // 订单状态变化
-    public void onOrderStatMessage(String vender, String connid, JSONObject jsonObject, Long receiveTime);
+    public void onOrderStatMessage(String vender, String connid, Message jsonObject, Long receiveTime);
 
     // 外汇期货市场价格变动
-    public void onPricingSteamMessage(String vender, String connid, JSONObject message, Long receiveTime);
+    public void onPricingSteamMessage(String vender, String connid, Message message, Long receiveTime);
 
     // 鉴权成功
-    public void onAuthMessage(String vender, String connid, JSONObject jsonObject, Long receiveTime);
+    public void onAuthMessage(String vender, String connid, Message jsonObject, Long receiveTime);
+    
+    // k线
+	public void onKLineMessage(String name, String connid, Message message, Long receiveTime);
     
 }

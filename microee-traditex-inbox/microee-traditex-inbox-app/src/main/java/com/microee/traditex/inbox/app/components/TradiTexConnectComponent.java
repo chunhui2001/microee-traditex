@@ -7,15 +7,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.annotation.PostConstruct;
+
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import com.microee.traditex.inbox.oem.connector.ITridexTradFactory;
 import com.microee.traditex.inbox.oem.connector.TradiTexConnection;
 import com.microee.traditex.inbox.oem.constrants.ConnectStatus;
 import com.microee.traditex.inbox.up.InBoxMessage;
+import com.microee.traditex.inbox.up.InBoxMessage.Message;
 
 @Component
 public class TradiTexConnectComponent {
@@ -101,7 +105,7 @@ public class TradiTexConnectComponent {
         // 广播连接关闭事件, 客户端在收到这个事件时会自动发起重连
         JSONObject _times = new JSONObject();
         _times.put("time0", Instant.now().toEpochMilli()); // 收到时间
-        JSONObject message = InBoxMessage.getMessage(connid, null, InBoxMessage.SHUTDOWN, connections().get(connid), _times);
+        Message message = InBoxMessage.getMessage(connid, null, InBoxMessage.SHUTDOWN, connections().get(connid), _times);
         this.combineMessage.onShutDownEvent(connid, message, Instant.now().toEpochMilli());
         this.connections.remove(connid);
         this.tradiTexRedis.removeConnection(connid);

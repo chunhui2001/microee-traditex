@@ -271,6 +271,24 @@ public class TradiTexConnectorRestful implements ITradiTexConnectorRMi {
         return R.ok(connid);
     }
 
+    // ### HBiTexTrade K线
+    // ### 订阅 HBiTexTrade K线 变动
+    // market.ethbtc.kline.1min
+    @RequestMapping(value = "/hbitex/kline/sub", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public R<String> hbitexKLineSub(
+    		@RequestHeader("connid") String connid,
+            @RequestParam("symbol") String symbol,
+            @RequestParam("period") String period
+    ) {
+        Assertions.assertThat(symbol).withFailMessage("%s 必传", "symbol").isNotBlank();
+        Assertions.assertThat(period).withFailMessage("%s 必传", "period").isNotBlank();
+        TradiTexConnection<?> conn = connectionComponent.get(connid);
+        restValidator.connIdValid(connid).connIdFun(connid, conn).connIdIllegalHbiTex(connid);
+        HBiTexKLineFactory hbiTexTradFactory = (HBiTexKLineFactory) conn.getFactory();
+        hbiTexTradFactory.proxy().subscribeKLine(period, symbol);
+        return R.ok(connid);
+    }
+
     // ### 订阅 HBiTexTrade orderbook 变动
     @RequestMapping(value = "/hbitex/orderbook/sub", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public R<Boolean> hbitexOrderBookSub(

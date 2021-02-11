@@ -41,11 +41,8 @@ public class OandaStreamHandler {
         if (lineObject.has("errorMessage")) {
             this.setConnectStatus(ConnectStatus.FAILED);
             _times.put("timeB", Instant.now().toEpochMilli()); // 处理时间
-            JSONObject config = new JSONObject();
-            config.put("url", request.url().toString());
-            config.put("headers", request.headers());
             this.combineMessageListener.onErrorMessage(_VENDER.name(), connid, 
-                    InBoxMessage.getMessage(connid, _VENDER, InBoxMessage.ERROR, lineObject, config, _times), receiveTime);
+                    InBoxMessage.getMessage(connid, _VENDER, InBoxMessage.ERROR, lineObject, _times), receiveTime);
             return;
         }
         if (lineObject.has("type") && lineObject.getString("type").equals("PRICE")) {
@@ -70,7 +67,7 @@ public class OandaStreamHandler {
         JSONObject lineObject = new JSONObject();
         lineObject.put("errorMessage", e.getMessage());
         combineMessageListener.onFailed(_VENDER.name(), this.connid, 
-                InBoxMessage.getMessage(connid, _VENDER, InBoxMessage.FAILED, lineObject, null, _times), eventTime);
+                InBoxMessage.getMessage(connid, _VENDER, InBoxMessage.FAILED, lineObject, _times), eventTime);
     }
 
     public void onOpenTrigger(Request request) {

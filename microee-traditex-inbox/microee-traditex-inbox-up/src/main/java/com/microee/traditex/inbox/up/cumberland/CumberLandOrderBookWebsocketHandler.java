@@ -194,7 +194,8 @@ public class CumberLandOrderBookWebsocketHandler implements HttpWebsocketHandler
             if (_MESSAGE_MAP.containsKey(tradDetails.getTradeRequest().getCounterpartyRequestId())) {
                     _MESSAGE_MAP.get(tradDetails.getTradeRequest().getCounterpartyRequestId()).setResult(tradDetails).success();
             }
-            this.combineMessageListener.onOrderStatMessage(_VENDER.name(), connid, jsonObject, receiveTime);
+            this.combineMessageListener.onOrderStatMessage(_VENDER.name(), connid, 
+            		InBoxMessage.getMessage(connid, _VENDER, InBoxMessage.ORDER_STATS, jsonObject, _times), receiveTime);
             return;
         }
         logger.warn("收到一条消息未处理, vender={}, url={}, message={}", _VENDER.name(), webSocket.request().url().toString(), line);

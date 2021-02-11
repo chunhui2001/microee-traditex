@@ -1,6 +1,12 @@
 package com.microee.traditex.inbox.up;
 
+import java.io.Serializable;
+import java.util.Map;
+
 import org.json.JSONObject;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.microee.plugin.http.assets.HttpAssets;
 import com.microee.traditex.inbox.oem.constrants.VENDER;
 
 //time0 源头时间
@@ -26,32 +32,32 @@ public class InBoxMessage {
     public static final String ORDER_STATS = "order-stats";
     public static final String UNKNOW = "unknow";
     public static final String AUTH = "auth";
+    public static final String KLINE = "kline";
 
-    public static JSONObject getMessage(
+    public static Message getMessage(
             String connid, VENDER vender, String event, JSONObject message, JSONObject times) {
-        JSONObject _message = new JSONObject();
-        _message.put("connid", connid);
-        if (vender != null) {
-            _message.put("vender", vender.name());
-        }
-        _message.put("event", event);
-        _message.put("_times", times);
-        _message.put("message", message);
-        return _message;
+        return new Message(connid, vender, event, message, times);
     }
+    
+    public static class Message implements Serializable {
 
-    public static JSONObject getMessage(
-            String connid, VENDER vender, String event, JSONObject message, JSONObject config, JSONObject times) {
-        JSONObject _message = new JSONObject();
-        _message.put("connid", connid);
-        if (vender != null) {
-            _message.put("vender", vender.name());
-        }
-        _message.put("event", event);
-        _message.put("_times", times);
-        _message.put("_config", config);
-        _message.put("message", message);
-        return _message;
+		private static final long serialVersionUID = -7370265026962529880L;
+		
+		public final String connid;
+		public final VENDER vender;
+		public final String event;
+		public final Map<String, Object> message;
+		public final Map<String, Object> times;
+		
+		public Message(String connid, VENDER vender, String event, JSONObject message, JSONObject times) {
+			super();
+			this.connid = connid;
+			this.vender = vender;
+			this.event = event;
+			this.message = HttpAssets.parseJson(message.toString(), new TypeReference<Map<String, Object>>() {});
+			this.times = HttpAssets.parseJson(times.toString(), new TypeReference<Map<String, Object>>() {});
+		}
+    	
     }
         
 }

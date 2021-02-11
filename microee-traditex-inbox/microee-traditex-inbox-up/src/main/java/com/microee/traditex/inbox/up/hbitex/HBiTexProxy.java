@@ -97,6 +97,12 @@ public class HBiTexProxy {
         }
     }
 
+    // 订阅K线, market.ethbtc.kline.1min
+	public void subscribeKLine(String period, String symbol) {
+		String message = String.format("{\"id\":\"%s\",\"sub\":\"market.%s.kline.%s\"}", UUID.randomUUID().toString(), symbol, period);
+        this.factory.wsHandler().writeMessage(message);
+	}
+	
     /**
      * 查询交易对列表
      * @param resthost

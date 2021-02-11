@@ -125,7 +125,7 @@ public class OrderBookStreamHandler {
         JSONObject lineObject = new JSONObject();
         lineObject.put("errorMessage", e.getMessage());
         combineMessageListener.onFailed(_VENDER.name(), this.connid, 
-                InBoxMessage.getMessage(connid, _VENDER, InBoxMessage.FAILED, lineObject, null, _times), eventTime);
+                InBoxMessage.getMessage(connid, _VENDER, InBoxMessage.FAILED, lineObject, _times), eventTime);
     }
 
     public void onOpenTrigger(Request request) {

@@ -1,12 +1,14 @@
 package com.microee.traditex.inbox.app.components;
 
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import com.microee.plugin.http.assets.HttpAssets;
 import com.microee.stacks.kafka.support.KafkaStringProducer;
+import com.microee.traditex.inbox.up.InBoxMessage.Message;
 
 @Component
 public class TradiTexKafkaProducer {
@@ -45,36 +47,36 @@ public class TradiTexKafkaProducer {
      * 广播连接建立成功事件
      * @param message
      */
-    public void subscribeEventBroadcase(JSONObject message) {
+    public void subscribeEventBroadcase(Message message) {
     	if (kafkaStringProducer == null) {
-    		logger.warn("收到消息未订阅: message={}", message.toString());
+    		logger.warn("收到消息未订阅-subscribeEventBroadcase: message={}", HttpAssets.toJsonString(message));
     		return;
     	}
-        kafkaStringProducer.sendMessage(subscribeEventTopic, message.toString());
+        kafkaStringProducer.sendMessage(subscribeEventTopic, HttpAssets.toJsonString(message));
     }
     
     /**
      * 广播连接建立成功事件
      * @param message
      */
-    public void connectedBroadcase(JSONObject message) {
+    public void connectedBroadcase(Message message) {
     	if (kafkaStringProducer == null) {
-    		logger.warn("收到消息未订阅: message={}", message.toString());
+    		logger.warn("收到消息未订阅-connectedBroadcase: message={}", HttpAssets.toJsonString(message));
     		return;
     	}
-        kafkaStringProducer.sendMessage(connectedTopic, message.toString());
+        kafkaStringProducer.sendMessage(connectedTopic, HttpAssets.toJsonString(message));
     }
 
     /**
      * 广播外汇价格变动事件
      * @param message
      */
-    public void pricingBroadcase(JSONObject message) {
+    public void pricingBroadcase(Message message) {
     	if (kafkaStringProducer == null) {
-    		logger.warn("收到消息未订阅: message={}", message.toString());
+    		logger.warn("收到消息未订阅-pricingBroadcase: message={}", HttpAssets.toJsonString(message));
     		return;
     	}
-        kafkaStringProducer.sendMessage(pricingTopic, message.toString());
+        kafkaStringProducer.sendMessage(pricingTopic, HttpAssets.toJsonString(message));
     }
     
     /**
@@ -82,12 +84,12 @@ public class TradiTexKafkaProducer {
      * 
      * @param message
      */
-    public void orderBookBroadcase(JSONObject message) {
+    public void orderBookBroadcase(Message message) {
     	if (kafkaStringProducer == null) {
-    		logger.warn("收到消息未订阅: message={}", message.toString());
+    		logger.warn("收到消息未订阅-orderBookBroadcase: message={}", HttpAssets.toJsonString(message));
     		return;
     	}
-        kafkaStringProducer.sendMessage(orderBookTopic, message.toString());
+        kafkaStringProducer.sendMessage(orderBookTopic, HttpAssets.toJsonString(message));
     }
     
     /**
@@ -95,12 +97,12 @@ public class TradiTexKafkaProducer {
      * 
      * @param message
      */
-    public void balanceBroadcase(JSONObject message) {
+    public void balanceBroadcase(Message message) {
     	if (kafkaStringProducer == null) {
-    		logger.warn("收到消息未订阅: message={}", message.toString());
+    		logger.warn("收到消息未订阅-balanceBroadcase: message={}", HttpAssets.toJsonString(message));
     		return;
     	}
-        kafkaStringProducer.sendMessage(banalceTopic, message.toString());
+        kafkaStringProducer.sendMessage(banalceTopic, HttpAssets.toJsonString(message));
     }
     
     /**
@@ -108,30 +110,37 @@ public class TradiTexKafkaProducer {
      * 
      * @param message
      */
-    public void orderStateBroadcase(JSONObject message) {
+    public void orderStateBroadcase(Message message) {
     	if (kafkaStringProducer == null) {
-    		logger.warn("收到消息未订阅: message={}", message.toString());
+    		logger.warn("收到消息未订阅-orderStateBroadcase: message={}", HttpAssets.toJsonString(message));
     		return;
     	}
-        kafkaStringProducer.sendMessage(orderStatTopic, message.toString());
+        kafkaStringProducer.sendMessage(orderStatTopic, HttpAssets.toJsonString(message));
     }
     
     // 广播鉴权事件
-    public void authEventBroadcase(JSONObject message) {
+    public void authEventBroadcase(Message message) {
     	if (kafkaStringProducer == null) {
-    		logger.warn("收到消息未订阅: message={}", message.toString());
+    		logger.warn("收到消息未订阅-authEventBroadcase: message={}", HttpAssets.toJsonString(message));
     		return;
     	}
-        kafkaStringProducer.sendMessage(authEventTopic, message.toString());
+        kafkaStringProducer.sendMessage(authEventTopic, HttpAssets.toJsonString(message));
     }
 
     // 广播连接关闭事件
-    public void shutdownBroadcase(JSONObject message) {
+    public void shutdownBroadcase(Message message) {
     	if (kafkaStringProducer == null) {
-    		logger.warn("收到消息未订阅: message={}", message.toString());
+    		logger.warn("收到消息未订阅-shutdownBroadcase: message={}", HttpAssets.toJsonString(message));
     		return;
     	}
-        kafkaStringProducer.sendMessage(connectShutDownEventTopic, message.toString());
+        kafkaStringProducer.sendMessage(connectShutDownEventTopic, HttpAssets.toJsonString(message));
     }
+
+	public void klineBroadcase(Message message) {
+    	if (kafkaStringProducer == null) {
+    		logger.warn("收到消息未订阅-klineBroadcase: message={}", HttpAssets.toJsonString(message));
+    		return;
+    	}
+	}
     
 }
