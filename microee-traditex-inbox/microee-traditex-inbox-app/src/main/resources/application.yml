@@ -1,5 +1,6 @@
+
 server:
-  port: 28081
+  port: 18081
   tomcat:
     basedir: ${java.io.tmpdir}/@project.name@_${server.port}
     
@@ -8,6 +9,47 @@ spring:
     active: local
   application:
     name: microee-traditex-inbox-app
-
-
     
+redis:
+  database: 0
+  timeout: 1000
+  port: 6379
+  host: redis_single_auth
+  pool:
+    max-active: 100
+    max-idle: 20
+    min-idle: 5
+    max-wait: 1000
+
+kafka:
+  bootstrap-servers: kafka_2.6.0:9093
+  consumer:
+    group-id: microee-traditex-inbox-app
+    auto-offset-reset: earliest
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+### 长连接配置
+connection:
+  # 连接过期时间, 超出这个时间的连接将被销毁
+  #expire: 300000
+  expire: 60000
+  # 是否启用ping
+  ping-enable: false
+
+# kafka topics
+topics:
+  inbox:
+    orderbook: inbox_hbitex_orderbook_message_topic_${spring.profiles.active}
+    pricing: inbox_pricing_stream_topic_${spring.profiles.active}
+    connected: inbox_connected_event_topic_${spring.profiles.active}
+    banalce: inbox_balance_topic_${spring.profiles.active}
+    orderstat: inbox_orderstat_topic_${spring.profiles.active}
+    authevent: inbox_authevent_topic_${spring.profiles.active}
+    subscribe.event: inbox_subscribe_event_topic_${spring.profiles.active}
+    connect.shutdown.event: inbox_connect_shutdown_event_topic_${spring.profiles.active}
+
+# redis topics
+topic:
+  traditex:
+    httplog.listener.message: __traditex.message.httplog.listener_${spring.profiles.active}
