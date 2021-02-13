@@ -1,7 +1,7 @@
 
 # server config
 server:
-  port: 18180
+  port: 18082
   tomcat:
     basedir: ${java.io.tmpdir}/@project.name@_${server.port}
     
