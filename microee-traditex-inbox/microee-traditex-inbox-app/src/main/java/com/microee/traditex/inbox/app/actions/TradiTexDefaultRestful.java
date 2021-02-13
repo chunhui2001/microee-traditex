@@ -28,8 +28,7 @@ public class TradiTexDefaultRestful {
      // curl ipecho.net/plain
      // curl ifconfig.co
     // #### 查看本机外网ip
-    @RequestMapping(value = "/pubip", method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/pubip", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public R<String> pubip() {
         HttpClientResult httpResult = httpClient.doGet("http://ifconfig.co", Headers.of("User-Agent", "curl/7.54.0"));
         if (httpResult.isSuccess()) {
