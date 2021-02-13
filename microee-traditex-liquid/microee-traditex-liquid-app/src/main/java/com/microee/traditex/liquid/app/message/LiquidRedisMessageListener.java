@@ -25,7 +25,7 @@ public class LiquidRedisMessageListener implements MessageListener {
     public void onMessage(Message message, byte[] pattern) {
         String _topic = new String(message.getChannel()); 
         String _message = new String(message.getBody(), StandardCharsets.UTF_8); 
-        LOGGER.info("保存到es: topic={}, _message={}", _topic, _message);
+        LOGGER.info("httpclient-log: topic={}, _message={}", _topic, _message);
     }
     
 }

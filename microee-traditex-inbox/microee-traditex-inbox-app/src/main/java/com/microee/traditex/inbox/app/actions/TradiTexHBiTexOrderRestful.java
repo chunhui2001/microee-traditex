@@ -27,7 +27,7 @@ import com.microee.traditex.inbox.up.hbitex.HBiTexFactory;
 
 // HBiTex 订单相关
 @RestController
-@RequestMapping("/traditex-hbitex-order")
+@RequestMapping("/hbitex-order")
 public class TradiTexHBiTexOrderRestful implements ITradiTexHBiTexOrderRMi {
 
     @Autowired
