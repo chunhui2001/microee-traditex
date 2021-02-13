@@ -15,7 +15,7 @@ public class TraditexClientConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TraditexClientConfiguration.class);
 
-    @Value("${micro.services.microee-traditex-inbox-app.listOfServers}")
+    @Value("${micro.services.microee-traditex-inbox-app.listOfServers:N/a}")
     private String listOfServers;
 
     @Bean

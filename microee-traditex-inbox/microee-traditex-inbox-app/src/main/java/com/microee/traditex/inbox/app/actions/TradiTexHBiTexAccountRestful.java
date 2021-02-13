@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.microee.plugin.response.R;
 import com.microee.traditex.inbox.app.components.TradiTexConnectComponent;
-import com.microee.traditex.inbox.app.components.TradiTexRedis;
+import com.microee.traditex.inbox.app.components.TradiTexConnectionStore;
 import com.microee.traditex.inbox.app.validator.RestValidator;
 import com.microee.traditex.inbox.interfaces.ITradiTexHBiTexAccountRMi;
 import com.microee.traditex.inbox.oem.connector.TradiTexConnection;
@@ -28,7 +28,7 @@ import okhttp3.Headers;
 
 // HBiTex 账户相关
 @RestController
-@RequestMapping("/traditex-hbitex-account")
+@RequestMapping("/hbitex-account")
 public class TradiTexHBiTexAccountRestful implements ITradiTexHBiTexAccountRMi {
 
     @Autowired
@@ -38,7 +38,7 @@ public class TradiTexHBiTexAccountRestful implements ITradiTexHBiTexAccountRMi {
     private RestValidator restValidator;
 
     @Autowired
-    private TradiTexRedis tradiTexRedis;
+    private TradiTexConnectionStore tradiTexRedis;
     
     // #### account
     // 查询账户id

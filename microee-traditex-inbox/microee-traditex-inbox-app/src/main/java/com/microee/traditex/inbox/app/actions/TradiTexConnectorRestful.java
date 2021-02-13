@@ -53,7 +53,7 @@ import okhttp3.Headers;
  * @author zhangchunhui
  */
 @RestController
-@RequestMapping("/traditex-ws-conns")
+@RequestMapping("/ws-conns")
 public class TradiTexConnectorRestful implements ITradiTexConnectorRMi { 
 
     private Hashids hashids = null;

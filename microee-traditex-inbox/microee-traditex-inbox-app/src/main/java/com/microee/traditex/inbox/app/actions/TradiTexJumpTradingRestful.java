@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.microee.plugin.response.R;
 import com.microee.traditex.inbox.app.components.TradiTexConnectComponent;
-import com.microee.traditex.inbox.app.components.TradiTexRedis;
+import com.microee.traditex.inbox.app.components.TradiTexConnectionStore;
 import com.microee.traditex.inbox.app.validator.RestValidator;
 import com.microee.traditex.inbox.oem.connector.TradiTexConnection;
 import com.microee.traditex.inbox.oem.jumptrading.apiparam.JTOrderStatusParam;
@@ -32,7 +32,7 @@ public class TradiTexJumpTradingRestful {
     private RestValidator restValidator;
 
     @Autowired
-    private TradiTexRedis tradiTexRedis;
+    private TradiTexConnectionStore tradiTexRedis;
     
     // ### JumpTrading 一次心跳
     @RequestMapping(value = "/heartBeat", method = RequestMethod.POST,

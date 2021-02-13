@@ -33,7 +33,7 @@ public class TradiTexConnectComponent {
     private Boolean pingEnable;
     
     @Autowired
-    private TradiTexRedis tradiTexRedis;
+    private TradiTexConnectionStore tradiTexRedis;
 
     @Autowired
     private CombineMessage combineMessage;

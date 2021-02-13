@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.microee.traditex.inbox.app.producer.TradiTexKafkaProducer;
 import com.microee.traditex.inbox.oem.connector.TradiTexConnection;
 import com.microee.traditex.inbox.up.CombineMessageListener;
 import com.microee.traditex.inbox.up.InBoxMessage.Message;
@@ -20,7 +21,7 @@ public class CombineMessage implements CombineMessageListener {
     private TradiTexConnectComponent connectionComponent;
 
     @Autowired
-    private HBiTexRetryer retryerComponent;
+    private HBiTexConnectRetryer retryerComponent;
 
     @Autowired
     private TradiTexKafkaProducer kafkaProducer;
@@ -48,7 +49,7 @@ public class CombineMessage implements CombineMessageListener {
     public void onFailed(String vender, String connid, Message message, Long eventTime) {
     	TradiTexConnection<?> connection = connectionComponent.putEvent(connid, "failed", eventTime);
     	if (connection != null) {
-            logger.info("onFailed, 连接失败, {} 秒后自动重连: vender={}, status={}, message={}", HBiTexRetryer.RECONNECT_TIME_SEC, vender, connection.getFactory().status(), message);
+            logger.info("onFailed, 连接失败, {} 秒后自动重连: vender={}, status={}, message={}", HBiTexConnectRetryer.RECONNECT_TIME_SEC, vender, connection.getFactory().status(), message);
             retryerComponent.add(connection); // 重新连接
     	}
     }

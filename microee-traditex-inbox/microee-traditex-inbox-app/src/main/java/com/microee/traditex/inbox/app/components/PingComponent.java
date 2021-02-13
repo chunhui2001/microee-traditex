@@ -16,35 +16,34 @@ import com.microee.traditex.inbox.oem.connector.ITridexTradFactory;
 @Component
 public class PingComponent {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PingComponent.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PingComponent.class);
 
+	@Autowired
+	private TradiTexConnectComponent tradiTexConnect;
 
-    @Autowired
-    private TradiTexConnectComponent tradiTexConnect;
-
-    // 检查远程原链接是否发送ping
-    @Async
-    @Scheduled(cron = "0/15 * * * * ?")
-    public void detected() throws IOException {
-        if (!tradiTexConnect.pingEnable()) {
-            return;
-        }
-        Map<String, JSONObject> connections = tradiTexConnect.connections();
-        for (Entry<String, JSONObject> entry : connections.entrySet()) {
-            String connid = entry.getKey();
-            JSONObject factoryConfig = entry.getValue();
-            ITridexTradFactory factory = tradiTexConnect.factory(connid);
-            Long createdAt = factoryConfig.getLong("createdAt"); // 连接id创建的时间
-            Long now = Instant.now().toEpochMilli(); // 当前时间
-            Long expire = tradiTexConnect.connectionExpire(); // 过期时间
-            Long expired = factory != null && factory.lease() != null ? factory.lease() - now : (createdAt + expire) - now;
-            if (expired < 0) {
-                // 关闭连接
-                tradiTexConnect.remove(connid);
-            }
-            LOGGER.info("ping-detected: connid={}, expire={}/{}, factoryNull={}, createdAt={}",
-                    connid, expire, expired, factory == null, createdAt);
-        }
-    }
+	// 检查远程原链接是否发送ping
+	@Async
+	@Scheduled(cron = "0/15 * * * * ?")
+	public void detected() throws IOException {
+		if (!tradiTexConnect.pingEnable()) {
+			return;
+		}
+		Map<String, JSONObject> connections = tradiTexConnect.connections();
+		for (Entry<String, JSONObject> entry : connections.entrySet()) {
+			String connid = entry.getKey();
+			JSONObject factoryConfig = entry.getValue();
+			ITridexTradFactory factory = tradiTexConnect.factory(connid);
+			Long createdAt = factoryConfig.getLong("createdAt"); // 连接id创建的时间
+			Long now = Instant.now().toEpochMilli(); // 当前时间
+			Long expire = tradiTexConnect.connectionExpire(); // 过期时间
+			Long expired = factory != null && factory.lease() != null ? factory.lease() - now : (createdAt + expire) - now;
+			if (expired < 0) {
+				// 关闭连接
+				tradiTexConnect.remove(connid);
+			}
+			LOGGER.info("ping-detected: connid={}, expire={}/{}, factoryNull={}, createdAt={}", connid, expire, expired,
+					factory == null, createdAt);
+		}
+	}
 
 }
