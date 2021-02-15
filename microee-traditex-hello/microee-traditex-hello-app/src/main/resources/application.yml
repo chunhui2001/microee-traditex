@@ -20,3 +20,19 @@ redis:
     max-idle: 20
     min-idle: 5
     max-wait: 1000
+
+# kafka server
+kafka:
+  bootstrap-servers: kafka_2.6.0:9093
+  consumer:
+    group-id: microee-traditex-inbox-app
+    auto-offset-reset: earliest
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+# kafka topics
+topics:
+  inbox:
+    orderbook: inbox_hbitex_orderbook_message_topic_${spring.profiles.active}
+    #kline.event: inbox_kline_event_topic_${spring.profiles.active}
+    kline.event: inbox_kline_event_topic_docker

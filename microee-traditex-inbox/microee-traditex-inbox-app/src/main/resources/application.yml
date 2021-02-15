@@ -1,15 +1,18 @@
 
+# server config
 server:
   port: 18081
   tomcat:
     basedir: ${java.io.tmpdir}/@project.name@_${server.port}
     
+# application config
 spring:
   profiles:
     active: local
   application:
     name: microee-traditex-inbox-app
     
+# redis server
 redis:
   database: 0
   timeout: 1000
@@ -21,6 +24,7 @@ redis:
     min-idle: 5
     max-wait: 1000
 
+# kafka server
 kafka:
   bootstrap-servers: kafka_2.6.0:9093
   consumer:
@@ -48,6 +52,7 @@ topics:
     authevent: inbox_authevent_topic_${spring.profiles.active}
     subscribe.event: inbox_subscribe_event_topic_${spring.profiles.active}
     connect.shutdown.event: inbox_connect_shutdown_event_topic_${spring.profiles.active}
+    kline.event: inbox_kline_event_topic_${spring.profiles.active}
 
 # redis topics
 topic:

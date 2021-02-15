@@ -71,9 +71,26 @@
 			<artifactId>microee-redis</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
+		<!-- kafka -->
+		<dependency>
+			<groupId>com.microee.stacks.kafka</groupId>
+			<artifactId>microee-kafka</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.microee.plugin.loging</groupId>
+					<artifactId>microee-loging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		<dependency>
 			<groupId>com.microee.traditex.hello.oem</groupId>
 			<artifactId>microee-traditex-hello-oem</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.microee.traditex.inbox.oem</groupId>
+			<artifactId>microee-traditex-inbox-oem</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
