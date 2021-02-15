@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class MessageTopicsProps {
+public class AppConfigurationProps {
 
     @Value("${topics.inbox.orderbook}")
     private String orderBookTopic;
@@ -12,7 +12,10 @@ public class MessageTopicsProps {
     @Value("${topics.inbox.kline.event}")
     private String klineEventTopic;
     
-    public MessageTopicsProps() {
+    @Value("${dingtalk.accessToken}")
+    private String tradDingTalkToken;
+    
+    public AppConfigurationProps() {
     	
     }
 
@@ -30,6 +33,14 @@ public class MessageTopicsProps {
 
 	public void setKlineEventTopic(String klineEventTopic) {
 		this.klineEventTopic = klineEventTopic;
+	}
+
+	public String getTradDingTalkToken() {
+		return tradDingTalkToken;
+	}
+
+	public void setTradDingTalkToken(String tradDingTalkToken) {
+		this.tradDingTalkToken = tradDingTalkToken;
 	}
     
 }

@@ -36,3 +36,7 @@ topics:
     orderbook: inbox_hbitex_orderbook_message_topic_${spring.profiles.active}
     #kline.event: inbox_kline_event_topic_${spring.profiles.active}
     kline.event: inbox_kline_event_topic_docker
+
+# dingtalk
+dingtalk:
+  accessToken: _access_token_placeholder_here

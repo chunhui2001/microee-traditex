@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.microee.stacks.kafka.consumer.KafkaSubscribe;
 import com.microee.traditex.hello.app.process.HBiTexKLineProcess;
-import com.microee.traditex.hello.app.props.MessageTopicsProps;
+import com.microee.traditex.hello.app.props.AppConfigurationProps;
 import com.microee.traditex.inbox.oem.constrants.InBoxMessageTypeEnum;
 import com.microee.traditex.inbox.oem.constrants.VENDER;
 
@@ -20,7 +20,7 @@ public class KLineComsumer implements InitializingBean {
 	private static final Logger LOGGER = LoggerFactory.getLogger(KLineComsumer.class);
 
 	@Autowired
-	private MessageTopicsProps messageTopicsProps;
+	private AppConfigurationProps appConf;
 
 	@Autowired
 	private KafkaSubscribe kafkaSubscribe;
@@ -30,10 +30,10 @@ public class KLineComsumer implements InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		kafkaSubscribe.create(this::klineConsumerProccess, messageTopicsProps.getKlineEventTopic()).start();
-		kafkaSubscribe.create(this::klineConsumerProccess, messageTopicsProps.getKlineEventTopic()).start();
-		kafkaSubscribe.create(this::klineConsumerProccess, messageTopicsProps.getKlineEventTopic()).start();
-		kafkaSubscribe.create(this::klineConsumerProccess, messageTopicsProps.getKlineEventTopic()).start();
+		kafkaSubscribe.create(this::klineConsumerProccess, appConf.getKlineEventTopic()).start();
+		kafkaSubscribe.create(this::klineConsumerProccess, appConf.getKlineEventTopic()).start();
+		kafkaSubscribe.create(this::klineConsumerProccess, appConf.getKlineEventTopic()).start();
+		kafkaSubscribe.create(this::klineConsumerProccess, appConf.getKlineEventTopic()).start();
 	}
 
 	// 处理所有k线
