@@ -28,7 +28,7 @@ $ mvn archetype:generate -DgroupId=com.microee.traditex.inbox.rmi -DartifactId=m
 ### 交易微服务 -- traditex-inbox mock/模拟第三方接口
 $ mvn archetype:generate -DgroupId=com.microee.traditex.inbox.mock -DartifactId=microee-traditex-inbox-mock -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false -DarchetypeCatalog=local
 
-### 交易微服务 -- traditex-liquid 流动性摆盘多账户，多币种
+### 交易微服务 -- traditex-liquid 
 mvn archetype:generate -DgroupId=com.microee.traditex.liquid -DartifactId=microee-traditex-liquid -DarchetypeArtifactId=pom-root -DinteractiveMode=false -DarchetypeGroupId=org.codehaus.mojo.archetypes -DarchetypeVersion=RELEASE -DarchetypeCatalog=local
 ### 交易微服务 -- traditex-liquid interfaces/服务对外接口
 $ mvn archetype:generate -DgroupId=com.microee.traditex.liquid.interfaces -DartifactId=microee-traditex-liquid-interfaces -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false -DarchetypeCatalog=local
@@ -38,6 +38,13 @@ $ mvn archetype:generate -DgroupId=com.microee.traditex.liquid.app -DartifactId=
 $ mvn archetype:generate -DgroupId=com.microee.traditex.liquid.oem -DartifactId=microee-traditex-liquid-oem -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false -DarchetypeCatalog=local
 ### 交易微服务 -- traditex-liquid rmi/远程调用
 $ mvn archetype:generate -DgroupId=com.microee.traditex.liquid.rmi -DartifactId=microee-traditex-liquid-rmi -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false -DarchetypeCatalog=local
+
+### 交易微服务 -- traditex-hello 行情通知, 策略提醒
+mvn archetype:generate -DgroupId=com.microee.traditex.hello -DartifactId=microee-traditex-hello -DarchetypeArtifactId=pom-root -DinteractiveMode=false -DarchetypeGroupId=org.codehaus.mojo.archetypes -DarchetypeVersion=RELEASE -DarchetypeCatalog=local
+### 交易微服务 -- traditex-hello 
+mvn archetype:generate -DgroupId=com.microee.traditex.hello.app -DartifactId=microee-traditex-hello-app -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false -DarchetypeCatalog=local
+### 交易微服务 -- traditex-hello oem/领域模型, entity/数据库实体类, model/DababaseObject, vo/ViewObject, po/ParamObject, bo/BusinessObject
+mvn archetype:generate -DgroupId=com.microee.traditex.hello.oem -DartifactId=microee-traditex-hello-oem -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false -DarchetypeCatalog=local
 
 ### 交易微服务 -- traditex-web 门户
 mvn archetype:generate -DgroupId=com.microee.traditex.web -DartifactId=microee-traditex-web -DarchetypeArtifactId=pom-root -DinteractiveMode=false -DarchetypeGroupId=org.codehaus.mojo.archetypes -DarchetypeVersion=RELEASE -DarchetypeCatalog=local

@@ -5,11 +5,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.microee.traditex.web.oem</groupId>
-	<artifactId>microee-traditex-web-oem</artifactId>
+	<groupId>com.microee.traditex.hello.oem</groupId>
+	<artifactId>microee-traditex-hello-oem</artifactId>
 	<version>1.0-SNAPSHOT</version>
 
-	<name>microee-traditex-web-oem</name>
+	<name>microee-traditex-hello-oem</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
@@ -22,7 +22,6 @@
 		<okhttp.version>4.6.0</okhttp.version>
 		<jackson.version>2.11.0</jackson.version>
 	</properties>
-
 
 	<dependencies>
 
@@ -80,4 +79,5 @@
 			</plugin>
 		</plugins>
 	</build>
+
 </project>
