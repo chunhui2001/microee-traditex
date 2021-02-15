@@ -45,4 +45,15 @@ public class DefaultRestful {
 		return R.ok(httpResult.getResult());
 	}
 
+	// 发送钉钉消息
+	@RequestMapping(value = "/ding-link", method = RequestMethod.POST, consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public R<String> dingLink(@RequestParam("title") String title, @RequestBody String message) {
+		String _url = "https://oapi.dingtalk.com/robot/send";
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("msgtype", "link");
+		jsonObject.put("link", new JSONObject().put("title", title).put("text", message).put("picUrl", "http://cdn.microee.com/RichMedias/apidoc/api-sign.png").put("messageUrl", "https://www.baidu.com"));
+		HttpClientResult httpResult = httpClient.postJson(_url, Headers.of("Content-Type", "application/json"), H.mapOf(KV.of("access_token", appConf.getTradDingTalkToken())), jsonObject.toString());
+		return R.ok(httpResult.getResult());
+	}
+	
 }
