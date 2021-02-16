@@ -1,7 +1,5 @@
 package com.microee.traditex.inbox.up;
 
-import org.json.JSONObject;
-
 import com.microee.traditex.inbox.up.InBoxMessage.Message;
 
 /**
