@@ -21,7 +21,6 @@ public class HBiTexKLineProcess {
 		Long _ts = kLineMessage.getLong("ts");
 		JSONObject _tick = kLineMessage.getJSONObject("tick");
 		Double[] data = new Double[] { _ts.doubleValue(), _tick.getDouble("open"), _tick.getDouble("high"), _tick.getDouble("low"), _tick.getDouble("close") };
-		LOGGER.info("vender=HBiTex, ts={}, symbol={}, period={}, tick={}", _ts, _symbol, _period, _tick.toString());
 		LOGGER.info("vender=HBiTex, ts={}, symbol={}, period={}, data={}", _ts, _symbol, _period, HttpAssets.toJsonString(data));
 	}
 	
