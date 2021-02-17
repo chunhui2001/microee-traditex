@@ -19,6 +19,7 @@ import com.microee.stacks.redis.support.RedisZSet;
 public class KLineRepository {
 
 	private static final String _KLINE_CACHE_PREFIX = "__hbitex_kline_cache4";
+	private static final int _KLINE_CACHE_LIMIT = 150;
 	
 	@Autowired
 	private RedisZSet redisZSet;
@@ -31,9 +32,8 @@ public class KLineRepository {
 			return HttpAssets.parseJson(jsonString, new TypeReference<Map<Long, Double[]>>() {});
 		};
 		String _cacheKey = String.join(":", _KLINE_CACHE_PREFIX, symbol, period);
-		int limit = 3;
-		redisZSet.incr(_cacheKey, HttpAssets.toJsonString(ImmutableMap.of(ts, func.apply(lastedKLine.getJSONObject("tick")))), ts, limit);
-		Set<Object> set = redisZSet.top(_cacheKey, limit);
+		redisZSet.incr(_cacheKey, HttpAssets.toJsonString(ImmutableMap.of(ts, func.apply(lastedKLine.getJSONObject("tick")))), ts, _KLINE_CACHE_LIMIT);
+		Set<Object> set = redisZSet.top(_cacheKey, _KLINE_CACHE_LIMIT);
 		Map<Long, Double[]> result = new LinkedHashMap<>();
 		for (Object i : set) {
 			Map<Long, Double[]> _map = func2.apply(i.toString());
