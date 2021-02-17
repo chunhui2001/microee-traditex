@@ -55,7 +55,7 @@ public abstract class HBiTexFactory implements ITridexTradFactory {
     protected final HttpClient httpClient;
     protected final HttpClient wsHttpClient;
     protected final CombineMessageListener combineMessageListener;
-    protected final HBiTexThreader theader;
+    protected final HBiTexThreader threader;
     protected final List<String> topics;
     protected Long lastTime;
     protected String lastEvent;
@@ -68,7 +68,7 @@ public abstract class HBiTexFactory implements ITridexTradFactory {
         this.wsHttpClient = HttpClient.create(null, proxy, "OKHTTP-WEBSOCKET");
         this.httpClient = HttpClient.create(null, proxy, "OKHTTP-CLIENT").setListener(this.conf.logger);
         this.combineMessageListener = combineMessageListener;
-        this.theader = new HBiTexThreader(this, this.conf.threadName);
+        this.threader = new HBiTexThreader(this, this.conf.threadName);
         this.topics = new ArrayList<>();
         this.lastEvent = null;
         this.lastTime = null;
@@ -206,7 +206,7 @@ public abstract class HBiTexFactory implements ITridexTradFactory {
     public void shutdown() {
         LOGGER.info("HBiTex-关闭连接: connid={}, connectConfig={}", this.connid(), this.config());
         this.wsHandler().closeWebsocket();
-        this.theader.shutdown();
+        this.threader.shutdown();
     }
     
     /**
@@ -217,12 +217,12 @@ public abstract class HBiTexFactory implements ITridexTradFactory {
         if (retryer) {
         	this.wsHandler().setConnectStatus(ConnectStatus.CONNECTING);
             LOGGER.info("HBiTex-WEBSOCKET-{}-启动重连: connid={}, connectConfig={}", this.conf.title, this.connid(), this.config());
-            this.theader.start();
+            this.threader.start();
             return;
         }
         this.wsHandler().setConnectStatus(ConnectStatus.CONNECTING);
         LOGGER.info("HBiTex-WEBSOCKET-{}-建立连接: connid={}, connectConfig={}", this.conf.title, this.connid(), this.config());
-        this.theader.start();
+        this.threader.start();
     }
 
     protected HttpClientResult doGet(String endpoint, Map<String, Object> queryMap) {

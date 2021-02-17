@@ -12,13 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.microee.plugin.response.R;
 import com.microee.traditex.inbox.app.components.TradiTexConnectComponent;
 import com.microee.traditex.inbox.app.validator.RestValidator;
+import com.microee.traditex.inbox.interfaces.ITradiTexHBiTexKLineRMi;
 import com.microee.traditex.inbox.oem.connector.TradiTexConnection;
 import com.microee.traditex.inbox.up.hbitex.factory.HBiTexKLineFactory;
 
 // HBiTex K线相关
 @RestController
 @RequestMapping("/hbitex-kline")
-public class TradiTexHBiTexKLineRestful {
+public class TradiTexHBiTexKLineRestful implements ITradiTexHBiTexKLineRMi {
 
 	@Autowired
     private TradiTexConnectComponent connectionComponent;
@@ -33,11 +34,11 @@ public class TradiTexHBiTexKLineRestful {
      * @param resthost
      * @param symbol
      * @param period 1min, 5min, 15min, 30min, 60min, 4hour, 1day, 1mon, 1week, 1year
-     * @param size
+     * @param size 查询的k线数量
      * @return
      */
-    @RequestMapping(value = "/query", method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @Override
+    @RequestMapping(value = "/query", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public R<String> query(
             @RequestHeader("connid") String connid,
             @RequestHeader("resthost") String resthost,
