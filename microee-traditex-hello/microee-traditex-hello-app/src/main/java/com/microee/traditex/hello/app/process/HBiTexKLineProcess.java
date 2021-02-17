@@ -1,6 +1,5 @@
 package com.microee.traditex.hello.app.process;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.json.JSONObject;
@@ -15,7 +14,7 @@ import com.microee.traditex.hello.app.repository.KLineRepository;
 @Component
 public class HBiTexKLineProcess {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(HBiTexKLineProcess.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(HBiTexKLineProcess.class); 
 
 //	@Autowired
 //	private AppConfigurationProps appConf;
