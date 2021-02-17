@@ -31,8 +31,8 @@ public class KLineRepository {
 		};
 		String _cacheKey = String.join(":", _KLINE_CACHE_PREFIX, symbol, period);
 		redisZSet.incr(_cacheKey, HttpAssets.toJsonString(ImmutableMap.of(ts, func.apply(lastedKLine.getJSONObject("tick")))), ts);
-		redisZSet.del(_cacheKey, 1);
-		Set<Object> set = redisZSet.top(_cacheKey, 1);
+		redisZSet.del(_cacheKey, 150);
+		Set<Object> set = redisZSet.top(_cacheKey, 150);
 		Map<Long, Double[]> result = new LinkedHashMap<>();
 		for (Object i : set) {
 			Map<Long, Double[]> _map = HttpAssets.parseJson(i.toString(), new TypeReference<Map<Long, Double[]>>() {});
