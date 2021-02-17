@@ -18,7 +18,7 @@ import com.microee.stacks.redis.support.RedisZSet;
 @Service
 public class KLineRepository {
 
-	private static final String _KLINE_CACHE_PREFIX = "__hbitex_kline_cache3";
+	private static final String _KLINE_CACHE_PREFIX = "__hbitex_kline_cache4";
 	
 	@Autowired
 	private RedisZSet redisZSet;
